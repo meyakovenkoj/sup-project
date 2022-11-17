@@ -1,0 +1,29 @@
+@startuml container
+!include C4_Container.puml
+
+System_Boundary(c1, "SUP") {
+    Container(web_app, "Веб-приложение", "JavaScript, HTML", "Позволяет взаимодействовать с системой с помощью браузера")
+    Container(web_server, "Веб-сервер", "Python3, Flask", "Обрабатывает API запросы от frontend и внешних систем")
+    ContainerDb(db, "База данных", "MongoDB", "Хранит информацию о проектах")
+}
+
+System_Ext(tms, "TMS", "внешняя система", $sprite="robot")
+Person(project_manager, "Начальник", "руководитель команды", $sprite="person")
+Person(developer, "Разработчик", "участник команды разработки", $sprite="person2")
+Person(administrator, "Администратор", "поддержка", $sprite="person2")
+Person_Ext(tester, "Тестировщик", "учатник команды тестировния", $sprite="person2")
+
+
+Rel(project_manager, web_app, "Добавляет пользователей, создает задачи, передает на тестирование, управляет проектом", "HTTP/JSON")
+Rel(web_server, tms, "Отправляет информацию о проекте", "HTTP/JSON")
+Rel_U(tester, web_app, "Просматривает информацию о задаче", "HTTP")
+Rel_L(tms, web_server, "Отправляет отчет о тестировании", "HTTP/JSON")
+Rel_R(developer, web_app, "Редактирует задачу, создает задачу, добавляет вложения ", "HTTP/JSON")
+Rel_D(tester, tms, "Взаимодействует с TMS", "HTTP/JSON")
+Rel_D(administrator, web_app, "Управляет проектом, управляет хранилищем", "HTTP/JSON")
+Rel_L(web_app, web_server,"API взаимодействие", "HTTP/JSON")
+Rel_D(web_server, db, "Сохраняет информацию", "HTTP/pymongo")
+
+Lay_R(web_app, tms)
+Lay_D(web_app, tester)
+@enduml

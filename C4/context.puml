@@ -1,0 +1,35 @@
+@startuml context
+!include C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Context diagram для Система управления проектами (SUP)
+
+Person(project_manager, "Руководитель", "Руководитель отдела")
+Person(developer, "Разработчик", "рядовой работник")
+Person(administrator, "Администратор", "поддержка")
+Person_Ext(tms_user, "Тестировщик", "пользвоатель TMS")
+
+UpdateSystemBoundaryStyle($bgColor="lightblue", $fontColor="DarkBlue", $borderColor="blue")
+System_Boundary(sb, "SUP") {
+    System(sup_task_system, "SUP задачи", "Подсистема управления задачами")
+    System(sup_project_system, "SUP проекты", "Подсистема управления проектами")
+    System(sup_user_system, "SUP пользователи", "Подсистема управления пользователями")
+    System(sup_admin_system, "SUP администратор", "Подсистема администрирования")
+}
+
+System_Ext(tms, "tms", "Внешняя система тестирования")
+
+Rel(project_manager, sup_user_system, "Назначает роль, ищет пользователя")
+Rel(project_manager, sup_task_system, "Создаёт новую задачу, редактирует задачу, меняет статус задачи")
+Rel(project_manager, sup_project_system, "Редактирует проект, изменяет участников проекта, Изменяет статус проекта, ищет проект, отправляет уведомления")
+Rel_Back(sup_user_system, administrator, "Редактирует пользователя, ищет пользователя,добавляет пользователя")
+Rel_Back(sup_project_system, administrator, "Создаёт проект, редактирует проект, архивирует проект, ищет проект")
+Rel_Back(sup_admin_system, administrator, "Проводит манипуляции над системой")
+Rel_Back(sup_user_system, developer, "Ищет пользователя")
+Rel_Back(sup_task_system, developer, "Создаёт новую задачу, редактирует задачу, меняет статус задачи, подписывается на задачу, ищет задачу")
+Rel_Back(sup_project_system, developer, "Ищет проект")
+Rel(tms_user, tms, "Взаимодействует с TMS")
+' Rel(sup_task_system, tms_user, "Получает информацию о задаче")
+Rel_Neighbor(tms, sup_task_system, "Обновляет информацию в задаче")
+@enduml
