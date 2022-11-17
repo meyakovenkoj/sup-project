@@ -30,6 +30,5 @@ Rel_Back(sup_user_system, developer, "Ищет пользователя")
 Rel_Back(sup_task_system, developer, "Создаёт новую задачу, редактирует задачу, меняет статус задачи, подписывается на задачу, ищет задачу")
 Rel_Back(sup_project_system, developer, "Ищет проект")
 Rel(tms_user, tms, "Взаимодействует с TMS")
-' Rel(sup_task_system, tms_user, "Получает информацию о задаче")
 Rel_Neighbor(tms, sup_task_system, "Обновляет информацию в задаче")
 @enduml

@@ -16,7 +16,6 @@ Person_Ext(tester, "Тестировщик", "учатник команды те
 
 Rel(project_manager, web_app, "Добавляет пользователей, создает задачи, передает на тестирование, управляет проектом", "HTTP/JSON")
 Rel(web_server, tms, "Отправляет информацию о проекте", "HTTP/JSON")
-Rel_U(tester, web_app, "Просматривает информацию о задаче", "HTTP")
 Rel_L(tms, web_server, "Отправляет отчет о тестировании", "HTTP/JSON")
 Rel_R(developer, web_app, "Редактирует задачу, создает задачу, добавляет вложения ", "HTTP/JSON")
 Rel_D(tester, tms, "Взаимодействует с TMS", "HTTP/JSON")
