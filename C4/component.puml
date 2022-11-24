@@ -1,0 +1,50 @@
+@startuml component
+!include C4_Component.puml
+
+Container(WebServer, "Веб сервер",  "Container: Python3, Flask", "Обрабатывает API запросы от frontend и внешних систем")
+Container(WebApp, "Веб приложение",  "Container: JavaScript, HTML", "Позволяет взаимодействовать с системой с помощью браузера")
+Container_Ext(TMS, "Внешняя система управлениея тестированием",  "Container:", "осуществляет взаимодействие с внешней системой")
+
+Boundary(mainBoundary, "WebServer", $type="BOUNDARY TYPE", $tags="v1") {
+    Component(SignInController, "Sign in controller", "Python", "Выполняет авторизацию пользователей в систему")
+    Component(SignInInterface, "Sign in interface", "Python", "Интерфейс для реализации авторизации обновления токенов и сессий")
+    Component(SecurityComponent, "Security Component", "Python", "Осуществляет работу с HTTPS, контроль доступа по модели RBAC")
+    Component(AccountController, "Account controller", "Python", "Выполняет контроль доступа и ограничение доступной функциональности")
+    Component(BusinessLogicController, "Business logic controller", "Python", "содержит основную бизнес логику")
+    Component(ProjectController, "Project controller", "Python", "Управление проектами")
+    Component(DbInterface, "DB Interface", "Python", "интерфейс для работы с БД")
+    Component(TaskController, "Task controller", "Python", "Управление задачами")
+    Component(RoleController, "Role controller", "Python", "Управление ролями пользователей")
+    Boundary(database, "Database") {
+        ComponentDb(projectsData, "Projects data", "schema")
+        ComponentDb(usersData, "Users data", "schema")
+        ComponentDb(tasksData, "Tasks data", "schema")
+        ComponentDb(accessData, "Access data", "schema")
+    }
+}
+
+Rel(WebApp, WebServer, "Makes API calls to", "HTTPS/JSON")
+Rel(TMS, WebServer, "Makes API calls to", "HTTPS/JSON")
+Rel(DbInterface, projectsData, "Makes API calls to", "HTTPS/pymongo")
+Rel(DbInterface, usersData, "Makes API calls to", "HTTPS/pymongo")
+Rel(DbInterface, tasksData, "Makes API calls to", "HTTPS/pymongo")
+Rel(DbInterface, accessData, "Makes API calls to", "HTTPS/pymongo")
+Rel(WebServer, SignInController, "Uses")
+Rel(WebServer, BusinessLogicController, "Uses")
+Rel(SignInController, SecurityComponent, "Uses")
+Rel(SignInController, SignInInterface, "Uses")
+Rel(SignInInterface, DbInterface, "Uses")
+Rel(BusinessLogicController, AccountController, "Uses")
+Rel(SecurityComponent, DbInterface, "Uses")
+Rel(AccountController, SecurityComponent, "Uses")
+Rel(BusinessLogicController, ProjectController, "Uses")
+Rel(BusinessLogicController, TaskController, "Uses")
+Rel(BusinessLogicController, RoleController, "Uses")
+Rel(ProjectController, RoleController, "Uses")
+Rel(TaskController, RoleController, "Uses")
+Rel(RoleController, DbInterface, "Uses")
+Rel(ProjectController, DbInterface, "Uses")
+Rel(TaskController, DbInterface, "Uses")
+
+SHOW_LEGEND()
+@enduml
