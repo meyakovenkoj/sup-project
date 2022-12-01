@@ -1,0 +1,19 @@
+{
+    "title" : "User",
+    "required": [
+        "Фамилия",
+        "Имя",
+        "username",
+        "password_hash",
+        "Участник проектов",
+        "Является админом"
+    ],
+    "properties": {
+        "Фамилия": {"bsonType": "string"},
+        "Имя": {"bsonType": "string"},
+        "username": {"bsonType": "string"},
+        "password_hash": {"bsonType": "string"},
+        "Участник проектов": {"bsonType": "array"},
+        "Является админом": {"bsonType": "bool"}
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "title" : "Comment",
+    "required": [
+        "Text",
+        "Author",
+        "create_date",
+        "edit_date"
+    ],
+    "properties": {
+        "Text": {"bsonType": "string"},
+        "Author": {"bsonType": "object"},
+        "create_date": {"bsonType": "date"},
+        "edit_date": {"bsonType": "date"}
+    }
+}

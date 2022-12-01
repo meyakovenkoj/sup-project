@@ -1,0 +1,15 @@
+{
+    "title" : "ProjectPatticipant",
+    "required": [
+        "Роль",
+        "Участник",
+        "Проект",
+        "Подписки",
+    ],
+    "properties": {
+        "Роль": {"enum": ["Project manager", "Worker"]},
+        "Участник": {"bsonType": "object"},
+        "Проект": {"bsonType": "object"},
+        "Подписки": {"bsonType": "array"}
+    }
+}

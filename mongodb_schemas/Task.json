@@ -1,0 +1,35 @@
+{
+    "title" : "Task",
+    "required": [
+        "Название",
+        "Автор",
+        "Дата создания",
+        "Последнее изменение",
+        "Исполнитель",
+        "Дата подтверждения",
+        "Описание",
+        "Проверяющий",
+        "Статус",
+        "Заинтересованные лица",
+        "Проект",
+        "Comments",
+        "Files",
+        "task_type"
+    ],
+    "properties": {
+        "Название": {"bsonType": "string"},
+        "Автор": {"bsonType": "object"},
+        "Дата создания": {"bsonType": "date"},
+        "Последнее изменение": {"bsonType": "date"},
+        "Исполнитель": {"bsonType": "array"},
+        "Дата подтверждения": {"bsonType": "date"},
+        "Описание": {"bsonType": "string"},
+        "Проверяющий": {"bsonType": "array"},
+        "Статус": {"enum": ["New","Open","Reopened","Ready(verification required)","Under verification","Closed","Under revision"]},
+        "Заинтересованные лица": {"bsonType": "array"},
+        "Проект": {"bsonType": "object"},
+        "Comments": {"bsonType": "array"},
+        "Files": {"bsonType": "array"},
+        "task_type": {"enum": ["Bug","Task","Feature","Story"]},
+    }
+}
