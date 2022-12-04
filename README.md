@@ -10,6 +10,10 @@
 
 ПМИ: https://docs.google.com/document/d/1EYt6WAis8pElORB9tVga57H7Fd0nEoeR/edit
 
+РП: https://docs.google.com/document/d/1LrESKvcBkgbeD5aRhOCsSnnHbTTPC6oe/edit?usp=sharing&ouid=101639726862492184221&rtpof=true&sd=true
+
+РА: https://docs.google.com/document/d/1ebF6xa_ysN5gMYropR9bd-7d0mZq6nm7/edit?usp=sharing&ouid=101639726862492184221&rtpof=true&sd=true
+
 `SUP.zip` содержит архив проекта Modelio. Там же можно делать bpmn либо в Camunda (`SUP.bpmn` файл)
 
 По этапам:
