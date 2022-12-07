@@ -1,0 +1,11 @@
+{
+  "SERVER_NAME": "http://v1517237.hosted-by-vdsina.ru/",
+  "LOGLEVEL": 20,
+  "LOGFILE": "logs/server.log",
+  "SECRET_KEY_FILENAME": ".flask_secret",
+  "UPLOAD_FOLDER": "temp_upload",
+  "STATIC_FOLDER": "static",
+  "MONGO_URI": "mongodb://127.0.0.1:27017/sup_data",
+  "DATE_FMT":  "%Y-%m-%d",
+  "DATETIME_FMT": "%Y-%m-%d %H:%M:%S"
+}
