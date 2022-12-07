@@ -4,7 +4,7 @@ import secrets
 import simplejson as json
 from pathlib import Path
 from flask import Flask, Response, abort, request
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 
@@ -110,6 +110,17 @@ def logout():
 @app.route('/')
 def hello_world():
     return 'Hello World!'
+
+
+@app.route('/me', methods=['GET'])
+@login_required
+def cur_user():
+    user = workers.UserWorker().get_by_username(current_user.get_name())
+    return _json_response(data={
+        "data": {
+            "user": dict(user)
+        }
+    })
 
 
 @app.route('/users', methods=['GET'])

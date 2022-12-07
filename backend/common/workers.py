@@ -46,6 +46,9 @@ class UserLogin:
     def get_name(self):
         return self.__user.username if self.__user else None
 
+    def is_admin(self):
+        return self.__user.is_admin if self.__user else None
+
 
 # DATABASE WORKERS
 
@@ -90,7 +93,7 @@ class UserWorker(BaseDBWorker):
             "username": username,
             "password_hash": password_hash,
             "projects": [],
-            "is_admin": True
+            "is_admin": False
         })
         if res.inserted_id is not None:
             return self.get_by_id(res.inserted_id)
