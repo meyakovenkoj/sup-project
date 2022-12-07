@@ -4,17 +4,17 @@
 
 Устав проекта: https://docs.google.com/document/d/1Bg1zPFpN5Be4yJ5q6aQjDfNZrw4URw17eydrQW6sKq0/edit
 
-ТЗ проекта: https://docs.google.com/document/d/1sT19Ty1Rhtsyf7lT65apbGzBMZc7Jv675xwpY_reZas/edit
+ТЗ проекта: https://docs.google.com/document/d/1r23ohS0hCJo2dhlYUEiyBixp0u3CiSulhLuV-cd4Bkk/edit
 
-Модель угроз: https://docs.google.com/document/d/1nmAxQxuYyFBkujeUuYl2a8Ns4KRwdYOw0o9NDt7XqlU/edit
+Модель угроз: https://docs.google.com/document/d/1M0JOjkTQGRQrBOAC-fr7LJVZEZe51XAx7jQGrXe1peY/edit
 
-ПЗ к ТЗ: https://docs.google.com/document/d/1OCRS02I0TFW_W5EQ7I8yoUwSRZ3VkDcB3soVPLindFk/edit
+ПЗ к ТЗ: https://docs.google.com/document/d/1h7dsZmwPRsRmCHPrgD70mNYqDhHll2a-2yiJ3QoMz0Y/edit
 
-ПМИ: https://docs.google.com/document/d/1EYt6WAis8pElORB9tVga57H7Fd0nEoeR/edit
+ПМИ: https://docs.google.com/document/d/17wnH6pr1xhqvSzL95FXX23TxzGFNk_Ka7FOGVCfVGkc/edit
 
-РП: https://docs.google.com/document/d/1LrESKvcBkgbeD5aRhOCsSnnHbTTPC6oe/edit
+РП: https://docs.google.com/document/d/1Gkg9Fd7tBKRoXh5-GADP1lTxEYmebTlFBfFXa_4Zvi8/edit
 
-РА: https://docs.google.com/document/d/1ebF6xa_ysN5gMYropR9bd-7d0mZq6nm7/edit
+РА: https://docs.google.com/document/d/1sT9ugBohyTjor88s0Ga9t2SH1SDNa-moLzdsP71EbbM/edit
 
 `SUP.zip` содержит архив проекта Modelio. Там же можно делать bpmn либо в Camunda (`SUP.bpmn` файл)
 
