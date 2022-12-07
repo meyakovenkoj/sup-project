@@ -1,7 +1,7 @@
 {
     "title" : "Project",
     "required": [
-        "project_id",
+        "_id",
         "title",
         "created",
         "participants",
@@ -9,12 +9,18 @@
         "status"
     ],
     "properties": {
-        "project_id": {"bsonType": "ObjectId"},
+        "_id": {"bsonType": "ObjectId"},
         "title": {"bsonType": "string"},
-        "head": {"bsonType": "object"},
+        "head": {"bsonType": "ObjectId"},
         "created": {"bsonType": "date"},
-        "participants": {"bsonType": "array"},
-        "tasks": {"bsonType": "array"},
+        "participants": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        },
+        "tasks": {"bsonType": "array",
+                "items":{"bsonType": "ObjectId"},
+				"minItems": 0
+        },
         "status": {"enum": ["open", "closed", "archived"]}
     }
 }

@@ -1,15 +1,15 @@
 {
     "title" : "Comment",
     "required": [
-        "comment_id",
+        "_id",
         "text",
         "author",
         "created"
     ],
     "properties": {
-        "comment_id": {"bsonType": "ObjectId"},
+        "_id": {"bsonType": "ObjectId"},
         "text": {"bsonType": "string"},
-        "author": {"bsonType": "object"},
+        "author": {"bsonType": "ObjectId"},
         "created": {"bsonType": "date"},
         "edited": {"bsonType": "date"}
     }

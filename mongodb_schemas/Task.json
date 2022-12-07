@@ -1,7 +1,7 @@
 {
     "title" : "Task",
     "required": [
-        "task_id",
+        "_id",
         "title",
         "author",
         "created",
@@ -14,20 +14,29 @@
         "task_type"
     ],
     "properties": {
-        "task_id": {"bsonType": "ObjectId"},
+        "_id": {"bsonType": "ObjectId"},
         "title": {"bsonType": "string"},
-        "author": {"bsonType": "object"},
+        "author": {"bsonType": "ObjectId"},
         "created": {"bsonType": "date"},
         "changed": {"bsonType": "date"},
-        "executor": {"bsonType": "array"},
+        "executor": {"bsonType": "ObjectId"},
         "accepted": {"bsonType": "date"},
         "description": {"bsonType": "string"},
-        "checker": {"bsonType": "array"},
+        "checker": {"bsonType": "ObjectId"},
         "status": {"enum": ["new","open","reopened","ready","verification","closed","correction"]},
-        "subscribers": {"bsonType": "array"},
-        "project": {"bsonType": "object"},
-        "comments": {"bsonType": "array"},
-        "files": {"bsonType": "array"},
+        "subscribers": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        },
+        "project": {"bsonType": "ObjectId"},
+        "comments": {"bsonType": "array",
+                    "items": {"bsonType": "ObjectId"},
+					"minItems": 0
+        },
+        "files": {"bsonType": "array",
+                "items": {"bsonType": "string"},
+				"minItems": 0
+        },
         "task_type": {"enum": ["bug","task","feature","story"]},
     }
 }

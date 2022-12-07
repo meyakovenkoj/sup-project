@@ -1,17 +1,20 @@
 {
     "title" : "ProjectPatticipant",
     "required": [
-        "pp_id",
+        "_id",
         "role",
         "user",
         "project",
         "subscriptions"
     ],
     "properties": {
-        "pp_id": {"bsonType": "ObjectId"},
+        "_id": {"bsonType": "ObjectId"},
         "role": {"enum": ["head", "worker"]},
-        "user": {"bsonType": "object"},
-        "project": {"bsonType": "object"},
-        "subscriptions": {"bsonType": "array"}
+        "user": {"bsonType": "ObjectId"},
+        "project": {"bsonType": "ObjectId"},
+        "subscriptions": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        }
     }
 }

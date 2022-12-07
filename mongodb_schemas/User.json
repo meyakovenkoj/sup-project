@@ -1,7 +1,7 @@
 {
     "title" : "User",
     "required": [
-        "user_id",
+        "_id",
         "surname",
         "name",
         "username",
@@ -10,12 +10,15 @@
         "is_admin"
     ],
     "properties": {
-        "user_id": {"bsonType": "ObjectId"},
+        "_id": {"bsonType": "ObjectId"},
         "surname": {"bsonType": "string"},
         "name": {"bsonType": "string"},
         "username": {"bsonType": "string"},
         "password_hash": {"bsonType": "string"},
-        "projects": {"bsonType": "array"},
+        "projects": {"bsonType": "array",
+                    "items": {"bsonType": "ObjectId"},
+					"minItems": 0
+        },
         "is_admin": {"bsonType": "bool"}
     }
 }
