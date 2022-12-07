@@ -1,6 +1,8 @@
 # Система Управления Проектами (SUP)
 
-Устав проекта доступен на google drive: https://docs.google.com/document/d/1Bg1zPFpN5Be4yJ5q6aQjDfNZrw4URw17eydrQW6sKq0/edit
+Диск проекта: https://drive.google.com/drive/folders/14nCI7u4MlhKjjmfHDN2kEoN3CbOXRwOL?usp=sharing
+
+Устав проекта: https://docs.google.com/document/d/1Bg1zPFpN5Be4yJ5q6aQjDfNZrw4URw17eydrQW6sKq0/edit
 
 ТЗ проекта: https://docs.google.com/document/d/1sT19Ty1Rhtsyf7lT65apbGzBMZc7Jv675xwpY_reZas/edit
 
