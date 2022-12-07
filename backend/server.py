@@ -113,6 +113,7 @@ def hello_world():
 
 
 @app.route('/users', methods=['GET'])
+@login_required
 def users():
     users_list = mongo.db.User.find({})
     logger.info(users_list)
@@ -124,11 +125,12 @@ def users():
 
 
 @app.route('/user/<string:username>', methods=['GET'])
+@login_required
 def user_by_username(username):
-    users_list = workers.UserWorker().get_by_username(username)
+    user = workers.UserWorker().get_by_username(username)
     return _json_response(data={
         "data": {
-            "users": [dict(user) for user in users_list]
+            "user": user
         }
     })
 
