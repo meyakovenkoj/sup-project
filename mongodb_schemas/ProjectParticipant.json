@@ -1,15 +1,17 @@
 {
     "title" : "ProjectPatticipant",
     "required": [
-        "Роль",
-        "Участник",
-        "Проект",
-        "Подписки",
+        "pp_id",
+        "role",
+        "user",
+        "project",
+        "subscriptions"
     ],
     "properties": {
-        "Роль": {"enum": ["Project manager", "Worker"]},
-        "Участник": {"bsonType": "object"},
-        "Проект": {"bsonType": "object"},
-        "Подписки": {"bsonType": "array"}
+        "pp_id": {"bsonType": "ObjectId"},
+        "role": {"enum": ["head", "worker"]},
+        "user": {"bsonType": "object"},
+        "project": {"bsonType": "object"},
+        "subscriptions": {"bsonType": "array"}
     }
 }

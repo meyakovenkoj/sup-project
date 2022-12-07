@@ -1,11 +1,13 @@
 {
     "title" : "TaskSubscriber",
     "required": [
-        "Задача",
-        "Подписчик"
+        "ts_id",
+        "task",
+        "subscribers"
     ],
     "properties": {
-        "Задача": {"bsonType": "object"},
-        "Подписчик": {"bsonType": "object"}
+        "ts_id": {"bsonType": "ObjectId"},
+        "task": {"bsonType": "object"},
+        "subscriber": {"bsonType": "object"}
     }
 }
