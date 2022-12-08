@@ -49,7 +49,8 @@ class AuthorizationController(BaseController):
                 not any(char.isdigit() for char in password) or \
                 not any(char.islower() for char in password) or \
                 not any(char.isupper() for char in password) or \
-                not any(char in string.punctuation for char in password):
+                not any(char in string.punctuation for char in password) or \
+                not all(char in string.ascii_letters + string.digits + string.punctuation for char in password):
             return False
 
         return True

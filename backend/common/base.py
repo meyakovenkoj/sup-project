@@ -15,7 +15,7 @@ class User:
             surname: str,
             username: str,
             password_hash: str,
-            projects: typing.List["Project"],
+            projects: typing.List["ProjectParticipant"],
             is_admin: bool
     ):
         self.user_id: ObjectId = id_obj
@@ -23,7 +23,7 @@ class User:
         self.surname: str = surname
         self.username: str = username
         self.password_hash: str = password_hash
-        self.projects: typing.List["Project"] = projects
+        self.projects: typing.List["ProjectParticipant"] = projects
         self.is_admin: bool = is_admin
 
     def __iter__(self):
