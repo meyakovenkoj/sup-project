@@ -1,105 +1,26 @@
 {
     "title" : "Project",
     "required": [
-        "Название",
-        "Руководитель",
-        "Дата создания",
-        "Участники",
-        "Задачи",
+        "_id",
+        "title",
+        "created",
+        "participants",
+        "tasks",
         "status"
     ],
     "properties": {
-        "Название": {"bsonType": "string"},
-        "Руководитель": {"bsonType": "object"},
-        "Дата создания": {"bsonType": "date"},
-        "Участники": {"bsonType": "array"},
-        "Задачи": {"bsonType": "array"},
-        "status": {"enum": ["Open", "Closed", "Archived"]}
-    }
-}
-
-
-
-{
-    "title" : "Task",
-    "required": [
-        "Название",
-        "Автор",
-        "Дата создания",
-        "Последнее изменение",
-        "Исполнитель",
-        "Дата подтверждения",
-        "Описание",
-        "Проверяющий",
-        "Статус",
-        "Заинтересованные лица",
-        "Проект",
-        "Comments",
-        "Files",
-        "task_type"
-    ],
-    "properties": {
-        "Название": {"bsonType": "string"},
-        "Автор": {"bsonType": "object"},
-        "Дата создания": {"bsonType": "date"},
-        "Последнее изменение": {"bsonType": "date"},
-        "Исполнитель": {"bsonType": "array"},
-        "Дата подтверждения": {"bsonType": "date"},
-        "Описание": {"bsonType": "string"},
-        "Проверяющий": {"bsonType": "array"},
-        "Статус": {"enum": ["New","Open","Reopened","Ready(verification required)","Under verification","Closed","Under revision"]},
-        "Заинтересованные лица": {"bsonType": "array"},
-        "Проект": {"bsonType": "object"},
-        "Comments": {"bsonType": "array"},
-        "Files": {"bsonType": "array"},
-        "task_type": {"enum": ["Bug","Task","Feature","Story"]},
-    }
-}
-
-{
-    "title" : "TaskSubscriber",
-    "required": [
-        "Задача",
-        "Подписчик"
-    ],
-    "properties": {
-        "Задача": {"bsonType": "object"},
-        "Подписчик": {"bsonType": "object"}
-    }
-}
-
-{
-    "title" : "Comment",
-    "required": [
-        "Text",
-        "Author",
-        "create_date",
-        "edit_date"
-    ],
-    "properties": {
-        "Text": {"bsonType": "string"},
-        "Author": {"bsonType": "object"},
-        "create_date": {"bsonType": "date"},
-        "edit_date": {"bsonType": "date"}
-    }
-}
-
-{
-    "title" : "User",
-    "required": [
-        "Фамилия",
-        "Имя",
-        "username",
-        "password_hash",
-        "Участник проектов",
-        "Является админом"
-    ],
-    "properties": {
-        "Фамилия": {"bsonType": "string"},
-        "Имя": {"bsonType": "string"},
-        "username": {"bsonType": "string"},
-        "password_hash": {"bsonType": "string"},
-        "Участник проектов": {"bsonType": "array"},
-        "Является админом": {"bsonType": "bool"}
+        "_id": {"bsonType": "ObjectId"},
+        "title": {"bsonType": "string"},
+        "head": {"bsonType": "ObjectId"},
+        "created": {"bsonType": "date"},
+        "participants": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        },
+        "tasks": {"bsonType": "array",
+                "items":{"bsonType": "ObjectId"},
+				"minItems": 0
+        },
+        "status": {"enum": ["open", "closed", "archived"]}
     }
 }

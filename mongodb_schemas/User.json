@@ -1,19 +1,24 @@
 {
     "title" : "User",
     "required": [
-        "Фамилия",
-        "Имя",
+        "_id",
+        "surname",
+        "name",
         "username",
         "password_hash",
-        "Участник проектов",
-        "Является админом"
+        "projects",
+        "is_admin"
     ],
     "properties": {
-        "Фамилия": {"bsonType": "string"},
-        "Имя": {"bsonType": "string"},
+        "_id": {"bsonType": "ObjectId"},
+        "surname": {"bsonType": "string"},
+        "name": {"bsonType": "string"},
         "username": {"bsonType": "string"},
         "password_hash": {"bsonType": "string"},
-        "Участник проектов": {"bsonType": "array"},
-        "Является админом": {"bsonType": "bool"}
+        "projects": {"bsonType": "array",
+                    "items": {"bsonType": "ObjectId"},
+					"minItems": 0
+        },
+        "is_admin": {"bsonType": "bool"}
     }
 }

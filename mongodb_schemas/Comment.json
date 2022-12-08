@@ -1,15 +1,16 @@
 {
     "title" : "Comment",
     "required": [
-        "Text",
-        "Author",
-        "create_date",
-        "edit_date"
+        "_id",
+        "text",
+        "author",
+        "created"
     ],
     "properties": {
-        "Text": {"bsonType": "string"},
-        "Author": {"bsonType": "object"},
-        "create_date": {"bsonType": "date"},
-        "edit_date": {"bsonType": "date"}
+        "_id": {"bsonType": "ObjectId"},
+        "text": {"bsonType": "string"},
+        "author": {"bsonType": "ObjectId"},
+        "created": {"bsonType": "date"},
+        "edited": {"bsonType": "date"}
     }
 }
