@@ -1,105 +1,146 @@
 {
     "title" : "Project",
     "required": [
-        "Название",
-        "Руководитель",
-        "Дата создания",
-        "Участники",
-        "Задачи",
+        "_id",
+        "title",
+        "created",
+        "participants",
+        "tasks",
         "status"
     ],
     "properties": {
-        "Название": {"bsonType": "string"},
-        "Руководитель": {"bsonType": "object"},
-        "Дата создания": {"bsonType": "date"},
-        "Участники": {"bsonType": "array"},
-        "Задачи": {"bsonType": "array"},
-        "status": {"enum": ["Open", "Closed", "Archived"]}
-    }
-}
-
-
-
-{
-    "title" : "Task",
-    "required": [
-        "Название",
-        "Автор",
-        "Дата создания",
-        "Последнее изменение",
-        "Исполнитель",
-        "Дата подтверждения",
-        "Описание",
-        "Проверяющий",
-        "Статус",
-        "Заинтересованные лица",
-        "Проект",
-        "Comments",
-        "Files",
-        "task_type"
-    ],
-    "properties": {
-        "Название": {"bsonType": "string"},
-        "Автор": {"bsonType": "object"},
-        "Дата создания": {"bsonType": "date"},
-        "Последнее изменение": {"bsonType": "date"},
-        "Исполнитель": {"bsonType": "array"},
-        "Дата подтверждения": {"bsonType": "date"},
-        "Описание": {"bsonType": "string"},
-        "Проверяющий": {"bsonType": "array"},
-        "Статус": {"enum": ["New","Open","Reopened","Ready(verification required)","Under verification","Closed","Under revision"]},
-        "Заинтересованные лица": {"bsonType": "array"},
-        "Проект": {"bsonType": "object"},
-        "Comments": {"bsonType": "array"},
-        "Files": {"bsonType": "array"},
-        "task_type": {"enum": ["Bug","Task","Feature","Story"]},
-    }
-}
-
-{
-    "title" : "TaskSubscriber",
-    "required": [
-        "Задача",
-        "Подписчик"
-    ],
-    "properties": {
-        "Задача": {"bsonType": "object"},
-        "Подписчик": {"bsonType": "object"}
-    }
-}
-
-{
-    "title" : "Comment",
-    "required": [
-        "Text",
-        "Author",
-        "create_date",
-        "edit_date"
-    ],
-    "properties": {
-        "Text": {"bsonType": "string"},
-        "Author": {"bsonType": "object"},
-        "create_date": {"bsonType": "date"},
-        "edit_date": {"bsonType": "date"}
+        "_id": {"bsonType": "ObjectId"},
+        "title": {"bsonType": "string"},
+        "head": {"bsonType": "ObjectId"},
+        "created": {"bsonType": "date"},
+        "participants": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        },
+        "tasks": {"bsonType": "array",
+                "items":{"bsonType": "ObjectId"},
+				"minItems": 0
+        },
+        "status": {"enum": ["open", "closed", "archived"]}
     }
 }
 
 {
     "title" : "User",
     "required": [
-        "Фамилия",
-        "Имя",
+        "_id",
+        "surname",
+        "name",
         "username",
         "password_hash",
-        "Участник проектов",
-        "Является админом"
+        "projects",
+        "is_admin"
     ],
     "properties": {
-        "Фамилия": {"bsonType": "string"},
-        "Имя": {"bsonType": "string"},
+        "_id": {"bsonType": "ObjectId"},
+        "surname": {"bsonType": "string"},
+        "name": {"bsonType": "string"},
         "username": {"bsonType": "string"},
         "password_hash": {"bsonType": "string"},
-        "Участник проектов": {"bsonType": "array"},
-        "Является админом": {"bsonType": "bool"}
+        "projects": {"bsonType": "array",
+                    "items": {"bsonType": "ObjectId"},
+					"minItems": 0
+        },
+        "is_admin": {"bsonType": "bool"}
+    }
+}
+
+{
+    "title" : "ProjectPatticipant",
+    "required": [
+        "_id",
+        "role",
+        "user",
+        "project",
+        "subscriptions"
+    ],
+    "properties": {
+        "_id": {"bsonType": "ObjectId"},
+        "role": {"enum": ["head", "worker"]},
+        "user": {"bsonType": "ObjectId"},
+        "project": {"bsonType": "ObjectId"},
+        "subscriptions": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        }
+    }
+}
+
+{
+    "title" : "Task",
+    "required": [
+        "_id",
+        "title",
+        "author",
+        "created",
+        "description",
+        "status",
+        "subscribers",
+        "project",
+        "comments",
+        "files",
+        "task_type"
+    ],
+    "properties": {
+        "_id": {"bsonType": "ObjectId"},
+        "title": {"bsonType": "string"},
+        "author": {"bsonType": "ObjectId"},
+        "created": {"bsonType": "date"},
+        "changed": {"bsonType": "date"},
+        "executor": {"bsonType": "ObjectId"},
+        "accepted": {"bsonType": "date"},
+        "description": {"bsonType": "string"},
+        "checker": {"bsonType": "ObjectId"},
+        "status": {"enum": ["new","open","reopened","ready","verification","closed","correction"]},
+        "subscribers": {"bsonType": "array",
+                        "items": {"bsonType": "ObjectId"},
+						"minItems": 0
+        },
+        "project": {"bsonType": "ObjectId"},
+        "comments": {"bsonType": "array",
+                    "items": {"bsonType": "ObjectId"},
+					"minItems": 0
+        },
+        "files": {"bsonType": "array",
+                "items": {"bsonType": "string"},
+				"minItems": 0
+        },
+        "task_type": {"enum": ["bug","task","feature","story"]},
+    }
+}
+
+{
+    "title" : "Comment",
+    "required": [
+        "_id",
+        "text",
+        "author",
+        "created"
+    ],
+    "properties": {
+        "_id": {"bsonType": "ObjectId"},
+        "text": {"bsonType": "string"},
+        "author": {"bsonType": "ObjectId"},
+        "created": {"bsonType": "date"},
+        "edited": {"bsonType": "date"}
+    }
+}
+
+{
+    "title" : "TaskSubscriber",
+    "required": [
+        "_id",
+        "task",
+        "subscriber"
+    ],
+    "properties": {
+        "_id": {"bsonType": "ObjectId"},
+        "task": {"bsonType": "ObjectId"},
+        "subscriber": {"bsonType": "ObjectId"}
     }
 }
