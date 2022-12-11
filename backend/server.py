@@ -206,6 +206,43 @@ def user_by_id(user_id):
         return _json_response({'message': 'Bad request'}, 400)
 
 
+@app.route('/_xhr/projects', methods=['GET'])
+@login_required
+def project_by_title():
+    title = request.args.get('title')
+    title_match = request.args.get('title_match')
+    if title:
+        project = controllers.ProjectController().get_project_by_title(title)
+        return _json_response(data={
+            "data": {
+                "project": project
+            }
+        }, status_code=200 if project else 404)
+    elif title_match:
+        projects_list = controllers.ProjectController().find_project_by_title(title_match)
+        return _json_response(data={
+            "data": {
+                "projects": projects_list
+            }
+        }, status_code=200 if projects_list else 404)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/projects/<string:project_id>', methods=['GET'])
+@login_required
+def project_by_id(project_id):
+    if project_id:
+        project = controllers.ProjectController().get_project(project_id)
+        return _json_response(data={
+            "data": {
+                "project": project
+            }
+        }, status_code=200 if project else 404)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
 @app.route('/')
 def hello_world():
     return 'Hello World!'

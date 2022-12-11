@@ -1,4 +1,5 @@
 import typing
+import re
 
 from flask import current_app, g
 from werkzeug.local import LocalProxy
@@ -107,7 +108,8 @@ class UserWorker(BaseDBWorker):
 
     def get_by_username_like(self, username_match: str) -> typing.List[base.User]:
         self.logger.info('Collecting users by username match')
-        res = self.select(self.db.User.find, {"username": {"$regex": username_match}})
+        rgx = re.compile(f'.*{username_match}.*', re.IGNORECASE)
+        res = self.select(self.db.User.find, {"username": rgx})
         return res
 
     def add_project(self, user_id: ObjectId, pp_id: ObjectId) -> typing.Optional[base.User]:
@@ -140,7 +142,8 @@ class ProjectWorker(BaseDBWorker):
 
     def get_by_title_like(self, title_match: str) -> typing.List[base.Project]:
         self.logger.info('Collecting projects by title match')
-        res = self.select(self.db.Project.find, {"title": {"$regex": title_match}})
+        rgx = re.compile(f'.*{title_match}.*', re.IGNORECASE)
+        res = self.select(self.db.Project.find, {"title": rgx})
         return res
 
     def add_project(self, title: str) -> typing.Optional[base.Project]:

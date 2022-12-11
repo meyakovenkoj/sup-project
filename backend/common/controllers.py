@@ -103,6 +103,9 @@ class ProjectController(BaseController):
     def create_project(self, title):
         return self._project_worker.add_project(cleaners.TitleCleaner.clean(title))
 
+    def get_project_by_title(self, title):
+        return self._project_worker.get_by_title(cleaners.TitleCleaner.clean(title))
+
     def find_project_by_title(self, title_match):
         return self._project_worker.get_by_title_like(cleaners.TitleCleaner.clean(title_match))
 
