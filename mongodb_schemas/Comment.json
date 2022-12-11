@@ -4,12 +4,14 @@
         "_id",
         "text",
         "author",
+        "task",
         "created"
     ],
     "properties": {
         "_id": {"bsonType": "ObjectId"},
         "text": {"bsonType": "string"},
         "author": {"bsonType": "ObjectId"},
+        "task": {"bsonType": "ObjectId"},
         "created": {"bsonType": "date"},
         "edited": {"bsonType": "date"}
     }

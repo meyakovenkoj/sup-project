@@ -37,6 +37,6 @@
                 "items": {"bsonType": "string"},
 				"minItems": 0
         },
-        "task_type": {"enum": ["bug","task","feature","story"]},
+        "task_type": {"enum": ["bug","task","feature","story"]}
     }
 }
