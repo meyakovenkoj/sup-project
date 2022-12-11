@@ -15,7 +15,7 @@ class User:
             surname: str,
             username: str,
             password_hash: str,
-            projects: typing.List["ProjectParticipant"],
+            projects: typing.List[typing.Union["ProjectParticipant", ObjectId]],
             is_admin: bool
     ):
         self.user_id: ObjectId = id_obj
@@ -23,7 +23,7 @@ class User:
         self.surname: str = surname
         self.username: str = username
         self.password_hash: str = password_hash
-        self.projects: typing.List["ProjectParticipant"] = projects
+        self.projects: typing.List[typing.Union["ProjectParticipant", ObjectId]] = projects
         self.is_admin: bool = is_admin
 
     def __iter__(self):
@@ -40,18 +40,18 @@ class Project:
             self,
             id_obj: ObjectId,
             title: str,
-            head: typing.Optional["ProjectParticipant"],
+            head: typing.Optional[typing.Union["ProjectParticipant", ObjectId]],
             created: date,
-            participants: typing.List["ProjectParticipant"],
-            tasks: typing.List["Task"],
+            participants: typing.List[typing.Union["ProjectParticipant", ObjectId]],
+            tasks: typing.List[typing.Union["Task", ObjectId]],
             status: consts.ProjectStatus
     ):
         self.project_id: ObjectId = id_obj
         self.title: str = title
-        self.head: typing.Optional["ProjectParticipant"] = head
+        self.head: typing.Optional[typing.Union["ProjectParticipant", ObjectId]] = head
         self.created: date = created
-        self.participants: typing.List["ProjectParticipant"] = participants
-        self.tasks: typing.List["Task"] = tasks
+        self.participants: typing.List[typing.Union["ProjectParticipant", ObjectId]] = participants
+        self.tasks: typing.List[typing.Union["Task", ObjectId]] = tasks
         self.status: consts.ProjectStatus = status
 
     def __iter__(self):
@@ -71,13 +71,13 @@ class ProjectParticipant:
             role: consts.RoleEnum,
             user: User,
             project: Project,
-            subscriptions: typing.List["TaskSubscriber"]
+            subscriptions: typing.List[typing.Union["TaskSubscriber", ObjectId]]
     ):
         self.pp_id: ObjectId = id_obj
         self.role: consts.RoleEnum = role
         self.user: User = user
         self.project: Project = project
-        self.subscriptions: typing.List["TaskSubscriber"] = subscriptions
+        self.subscriptions: typing.List[typing.Union["TaskSubscriber", ObjectId]] = subscriptions
 
     def __iter__(self):
         yield "id", str(self.pp_id)
@@ -92,33 +92,33 @@ class Task:
             self,
             id_obj: ObjectId,
             title: str,
-            author: ProjectParticipant,
+            author: typing.Union[ProjectParticipant, ObjectId],
             created: datetime,
             changed: typing.Optional[datetime],
-            executor: typing.Optional[ProjectParticipant],
+            executor: typing.Optional[typing.Union[ProjectParticipant, ObjectId]],
             accepted: typing.Optional[datetime],
             description: str,
-            checker: typing.Optional[ProjectParticipant],
+            checker: typing.Optional[typing.Union[ProjectParticipant, ObjectId]],
             status: consts.TaskStatus,
-            subscribers: typing.List["TaskSubscriber"],
+            subscribers: typing.List[typing.Union["TaskSubscriber", ObjectId]],
             project: Project,
-            comments: typing.List["Comment"],
+            comments: typing.List[typing.Union["Comment", ObjectId]],
             files: typing.List[str],
             task_type: consts.TaskType
     ):
         self.task_id: ObjectId = id_obj
         self.title: str = title
-        self.author: ProjectParticipant = author
+        self.author: typing.Union[ProjectParticipant, ObjectId] = author
         self.created: datetime = created
         self.changed: typing.Optional[datetime] = changed
-        self.executor: typing.Optional[ProjectParticipant] = executor
+        self.executor: typing.Optional[typing.Union[ProjectParticipant, ObjectId]] = executor
         self.accepted: typing.Optional[datetime] = accepted
         self.description: str = description
-        self.checker: typing.Optional[ProjectParticipant] = checker
+        self.checker: typing.Optional[typing.Union[ProjectParticipant, ObjectId]] = checker
         self.status: consts.TaskStatus = status
-        self.subscribers: typing.List["TaskSubscriber"] = subscribers
+        self.subscribers: typing.List[typing.Union["TaskSubscriber", ObjectId]] = subscribers
         self.project: Project = project
-        self.comments: typing.List["Comment"] = comments
+        self.comments: typing.List[typing.Union["Comment", ObjectId]] = comments
         self.files: typing.List[str] = files
         self.task_type: consts.TaskType = task_type
 
@@ -163,12 +163,14 @@ class Comment:
             id_obj: ObjectId,
             text: str,
             author: User,
+            task: Task,
             created: datetime,
             edited: typing.Optional[datetime]
     ):
         self.comment_id: ObjectId = id_obj
         self.text: str = text
         self.author: User = author
+        self.task: Task = task  # TODO add to classes and schema
         self.created: datetime = created
         self.edited: typing.Optional[datetime] = edited
 
@@ -176,5 +178,6 @@ class Comment:
         yield "id", str(self.comment_id)
         yield "text", self.text
         yield "author", dict(self.author)
+        yield "task", dict(self.task)
         yield "created", self.created.strftime(config.DATETIME_FMT)
         yield "edited", self.edited.strftime(config.DATETIME_FMT) if self.edited is not None else None

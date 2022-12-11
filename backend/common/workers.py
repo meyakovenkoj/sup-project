@@ -7,9 +7,11 @@ from pymongo.errors import DuplicateKeyError, OperationFailure
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
 from bson.errors import InvalidId
+from datetime import date, datetime
 
 from common import managers, base
 from common.logger import get_logger
+from common import consts
 
 
 def get_db():
@@ -70,6 +72,11 @@ class BaseDBWorker:
         self.logger.info(f"Insert result: id={res.inserted_id}, ack={res.acknowledged}")
         return res
 
+    def update(self, collection: Collection, *args):
+        res = collection.update_one(*args)
+        self.logger.info(f"Update result: {res.raw_result}, matched={res.matched_count}, modified={res.modified_count}, ack={res.acknowledged}")
+        return res
+
 
 class UserWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -98,4 +105,50 @@ class UserWorker(BaseDBWorker):
         if res.inserted_id is not None:
             return self.get_by_id(res.inserted_id)
 
+    def get_by_username_like(self, username_match: str) -> typing.List[base.User]:
+        self.logger.info('Collecting users by username match')
+        res = self.select(self.db.User.find, {"username": {"$regex": username_match}})
+        return res
 
+
+class ProjectWorker(BaseDBWorker):
+    def _factory(self, cursor):
+        return [managers.ProjectManager.from_db_dict(proj) for proj in cursor]
+
+    def get_by_id(self, project_id: ObjectId) -> typing.Optional[base.Project]:
+        self.logger.info('Collecting projects by id')
+        res = self.select(self.db.Project.find, {"_id": project_id})
+        return res[0] if res else None
+
+    def get_by_title(self, title: str) -> typing.Optional[base.Project]:
+        self.logger.info('Collecting projects by title')
+        res = self.select(self.db.Project.find, {"title": title})
+        return res[0] if res else None
+
+    def get_by_title_like(self, title_match: str) -> typing.List[base.Project]:
+        self.logger.info('Collecting projects by title match')
+        res = self.select(self.db.Project.find, {"title": {"$regex": title_match}})
+        return res
+
+    def add_project(self, title: str) -> typing.Optional[base.Project]:
+        self.logger.info('Creating new project')
+        res = self.insert(self.db.Project, {
+            "title": title,
+            "created": datetime.now().date(),
+            "participants": [],
+            "tasks": [],
+            "status": consts.ProjectStatus.open.value,
+        })
+        if res.inserted_id is not None:
+            return self.get_by_id(res.inserted_id)
+
+    def set_head(self, head: ObjectId, project_id: ObjectId) -> typing.Optional[base.Project]:
+        self.logger.info(f'Setting project head')
+        res = self.update(self.db.Project, {'_id': project_id}, {"$set": {'head': head}})
+        if res.modified_count > 0:
+            return self.get_by_id(project_id)
+
+
+class ProjectParticipantWorker(BaseDBWorker):
+    def _factory(self, cursor):
+        pass

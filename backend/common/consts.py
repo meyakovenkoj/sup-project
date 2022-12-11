@@ -1,3 +1,5 @@
+import string
+
 from enum import IntEnum
 
 
@@ -30,3 +32,5 @@ class TaskStatus(IntEnum):
 
 
 MIN_PASSWORD_LEN = 12
+PASSWORD_SIMBOLS = string.ascii_letters + string.digits + string.punctuation
+USERNAME_SIMBOLS = string.ascii_letters + string.digits

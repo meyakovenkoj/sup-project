@@ -107,6 +107,37 @@ def logout():
     return _json_response({'message': 'Successful logout'}, 200)
 
 
+@app.route('/_xhr/project', methods=['POST'])
+@login_required
+def new_project():
+    if not current_user.is_admin():
+        return _json_response({'message': "You do not have admin rights"}, 405)
+    data = request.get_json()
+    if data and 'title' in data.keys():
+        title = data['title']
+        project_controller = controllers.ProjectController()
+        if not project_controller.validate_title(title):
+            logger.info('Failed title validation')
+            return _json_response({'message': 'Failed title validation'}, 400)
+        if not project_controller.check_title_free(title):
+            logger.info('Title already in use')
+            return _json_response({'message': 'Title already in use'}, 400)
+        project = project_controller.create_project(title)
+        if project:
+            logger.info('Project created')
+            return _json_response(
+                {
+                    'message': 'Project created',
+                    'data': {'project': dict(project)}
+                }, 201)
+        else:
+            logger.info('Failed project creation')
+            return _json_response({'message': 'Project not created'}, 400)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+
 @app.route('/')
 def hello_world():
     return 'Hello World!'
