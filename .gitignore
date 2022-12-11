@@ -2,5 +2,6 @@
 
 .idea
 
-backend/__pycache__
+backend/*__pycache__
 backend/configs/local.config.json
+backend/.flask_secret
