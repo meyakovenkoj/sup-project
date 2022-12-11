@@ -1,1 +1,6 @@
 .DS_Store
+
+.idea
+
+backend/__pycache__
+backend/configs/local.config.json
