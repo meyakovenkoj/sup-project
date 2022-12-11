@@ -128,7 +128,7 @@ def new_project():
             return _json_response(
                 {
                     'message': 'Project created',
-                    'data': {'project': dict(project)}
+                    'data': {'project': project}
                 }, 201)
         else:
             logger.info('Failed project creation')
@@ -136,6 +136,74 @@ def new_project():
     else:
         return _json_response({'message': 'Bad request'}, 400)
 
+
+@app.route('/_xhr/project/head', methods=['POST'])
+@login_required
+def set_project_head():
+    if not current_user.is_admin():
+        return _json_response({'message': "You do not have admin rights"}, 405)
+    data = request.get_json()
+    if data and 'user_id' in data.keys() and 'project_id' in data.keys():
+        user_id = data['user_id']
+        if not controllers.UserController().get_user(user_id):
+            logger.info('No such user')
+            return _json_response({'message': 'No such user'}, 400)
+        project_id = data['project_id']
+        project_controller = controllers.ProjectController()
+        pp = project_controller.set_head(project_id, user_id)
+        if not pp:
+            logger.info('No such project')
+            return _json_response({'message': 'No such project'}, 400)
+        project = pp.project
+        pp.project = project.id
+        if pp in pp.user.projects:
+            pp.user.projects.remove(pp)
+            pp.user.projects.append(pp.id)
+        logger.info('Project head updated')
+        return _json_response(
+            {
+                'message': 'Project head updated',
+                'data': {'project': project}
+            }, 200)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/users', methods=['GET'])
+@login_required
+def user_by_username():
+    username = request.args.get('username')
+    username_match = request.args.get('username_match')
+    if username:
+        user = controllers.UserController().get_user_by_username(username)
+        return _json_response(data={
+            "data": {
+                "user": user
+            }
+        }, status_code=200 if user else 404)
+    elif username_match:
+        users_list = controllers.UserController().find_user_by_username(username_match)
+        return _json_response(data={
+            "data": {
+                "users": users_list
+            }
+        }, status_code=200 if users_list else 404)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/users/<string:user_id>', methods=['GET'])
+@login_required
+def user_by_id(user_id):
+    if user_id:
+        user = controllers.UserController().get_user(user_id)
+        return _json_response(data={
+            "data": {
+                "user": user
+            }
+        }, status_code=200 if user else 404)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
 
 
 @app.route('/')
@@ -162,17 +230,6 @@ def users():
     return _json_response(data={
         "data": {
             "users": list(users_list)
-        }
-    })
-
-
-@app.route('/user/<string:username>', methods=['GET'])
-@login_required
-def user_by_username(username):
-    user = workers.UserWorker().get_by_username(username)
-    return _json_response(data={
-        "data": {
-            "user": user
         }
     })
 

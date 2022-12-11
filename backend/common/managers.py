@@ -45,19 +45,19 @@ class ProjectManager:
 class ProjectParticipantManager:
     @staticmethod
     def from_db_dict(data):
-        proj = ProjectManager.from_db_dict(data['project'])
-        user = UserManager.from_db_dict(data['user'])
         pp = base.ProjectParticipant(
             id_obj=data['_id'],
-            role=consts.RoleEnum[data['role']],
-            user=user,
-            project=proj,
+            role=consts.RoleEnum[data['role']] if isinstance(data['role'], str) else consts.RoleEnum(data['role']),
+            user=data['user'],
+            project=data['project'],
             subscriptions=data['subscriptions']
         )
-        proj.participants.remove(pp.pp_id)
-        proj.participants.append(pp)
-        if proj.head and proj.head == pp.pp_id:
-            proj.head = pp
-        user.projects.remove(pp.pp_id)
-        user.projects.append(pp)
+        if pp.id in pp.project.participants:
+            pp.project.participants.remove(pp.id)
+        pp.project.participants.append(pp)
+        if pp.project.head and pp.project.head == pp.id:
+            pp.project.head = pp
+        if pp.id in pp.user.projects:
+            pp.user.projects.remove(pp.id)
+        pp.user.projects.append(pp)
         return pp

@@ -9,9 +9,9 @@ from pymongo.collection import Collection
 from bson.errors import InvalidId
 from datetime import date, datetime
 
-from common import managers, base
+from common import managers, base, consts
 from common.logger import get_logger
-from common import consts
+from common.conf import config
 
 
 def get_db():
@@ -34,7 +34,7 @@ class UserLogin:
         self.__user = user
 
     def get_id(self):
-        return str(self.__user.user_id)
+        return str(self.__user.id)
 
     def is_authenticated(self):
         return True if self.__user else False
@@ -110,6 +110,19 @@ class UserWorker(BaseDBWorker):
         res = self.select(self.db.User.find, {"username": {"$regex": username_match}})
         return res
 
+    def add_project(self, user_id: ObjectId, pp_id: ObjectId) -> typing.Optional[base.User]:
+        user = self.get_by_id(user_id)
+        if user:
+            self.logger.info(f'adding participant to user')
+            if pp_id not in user.projects:
+                user.projects.append(pp_id)
+            set_dict = {
+                "projects": user.projects
+            }
+            res = self.update(self.db.User, {'_id': user_id}, {"$set": set_dict})
+            if res.modified_count > 0:
+                return self.get_by_id(user_id)
+
 
 class ProjectWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -134,7 +147,7 @@ class ProjectWorker(BaseDBWorker):
         self.logger.info('Creating new project')
         res = self.insert(self.db.Project, {
             "title": title,
-            "created": datetime.now().date(),
+            "created": datetime.now().date().strftime(config.DATE_FMT),
             "participants": [],
             "tasks": [],
             "status": consts.ProjectStatus.open.value,
@@ -148,7 +161,85 @@ class ProjectWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(project_id)
 
+    def add_participant(self, project_id: ObjectId, pp_id: ObjectId, as_head: bool = False) -> typing.Optional[base.Project]:
+        project = self.get_by_id(project_id)
+        if project:
+            self.logger.info(f'adding participant to the project')
+            if pp_id not in project.participants:
+                project.participants.append(pp_id)
+            set_dict = {
+                "participants": project.participants
+            }
+            if as_head:
+                set_dict['head'] = pp_id
+            res = self.update(self.db.Project, {'_id': project_id}, {"$set": set_dict})
+            if res.modified_count > 0:
+                return self.get_by_id(project_id)
+
 
 class ProjectParticipantWorker(BaseDBWorker):
     def _factory(self, cursor):
-        pass
+        _user_worker = UserWorker()
+        _project_worker = ProjectWorker()
+        res = []
+        users = []
+        projects = []
+        for pp in cursor:
+            user = [_user for _user in users if pp['user'] != _user.id]
+            if user:
+                pp['user'] = user[0]
+            else:
+                pp['user'] = _user_worker.get_by_id(pp['user'])
+                users.append(pp['user'])
+
+            project = [_project for _project in projects if pp['project'] != _project.id]
+            if project:
+                pp['project'] = project[0]
+            else:
+                pp['project'] = _project_worker.get_by_id(pp['project'])
+                projects.append(pp['project'])
+            res.append(managers.ProjectParticipantManager.from_db_dict(pp))
+
+        return res
+
+    def get_by_id(self, pp_id: ObjectId) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info('Collecting projects participants by id')
+        res = self.select(self.db.ProjectParticipant.find, {"_id": pp_id})
+        return res[0] if res else None
+
+    def get_by_project_id(self, project_id: ObjectId) -> typing.List[base.ProjectParticipant]:
+        self.logger.info('Collecting projects participants by project id')
+        res = self.select(self.db.ProjectParticipant.find, {"project": project_id})
+        return res
+
+    def get_by_user_id(self, user_id: ObjectId) -> typing.List[base.ProjectParticipant]:
+        self.logger.info('Collecting projects participants by user id')
+        res = self.select(self.db.ProjectParticipant.find, {"user": user_id})
+        return res
+
+    def get_by_project_id_and_user_id(self, project_id: ObjectId, user_id: ObjectId) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info('Collecting projects participants by project id and user id')
+        res = self.select(self.db.ProjectParticipant.find, {"project": project_id, "user": user_id})
+        return res[0] if res else None
+
+    def create_pp(
+            self,
+            user_id: ObjectId,
+            project_id: ObjectId,
+            role: consts.RoleEnum = consts.RoleEnum.worker
+    ) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info('Creating new project participant')
+        res = self.insert(self.db.ProjectParticipant, {
+            "role": role.value,
+            "user": user_id,
+            "project": project_id,
+            "subscriptions": []
+        })
+        if res.inserted_id is not None:
+            return self.get_by_id(res.inserted_id)
+
+    def update_role(self, pp_id: ObjectId, role: consts.RoleEnum) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info(f'Updating project participant role')
+        res = self.update(self.db.ProjectParticipant, {'_id': pp_id}, {"$set": {'role': role.value}})
+        if res.modified_count > 0:
+            return self.get_by_id(pp_id)

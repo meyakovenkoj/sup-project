@@ -7,7 +7,21 @@ from common import consts
 from common.conf import config
 
 
-class User:
+class BaseClass:
+    def __init__(self, id_obj: ObjectId):
+        self._id = id_obj
+
+    @property
+    def id(self):
+        return self._id
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self._id == other._id
+        return False
+
+
+class User(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
@@ -18,7 +32,7 @@ class User:
             projects: typing.List[typing.Union["ProjectParticipant", ObjectId]],
             is_admin: bool
     ):
-        self.user_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.name: str = name
         self.surname: str = surname
         self.username: str = username
@@ -27,15 +41,15 @@ class User:
         self.is_admin: bool = is_admin
 
     def __iter__(self):
-        yield "id", str(self.user_id)
+        yield "id", str(self._id)
         yield "name", self.name
         yield "surname", self.surname
         yield "username", self.username
-        yield "projects", [dict(project) for project in self.projects]
+        yield "projects", [project for project in self.projects]
         yield "is_admin", self.is_admin
 
 
-class Project:
+class Project(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
@@ -46,7 +60,7 @@ class Project:
             tasks: typing.List[typing.Union["Task", ObjectId]],
             status: consts.ProjectStatus
     ):
-        self.project_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.title: str = title
         self.head: typing.Optional[typing.Union["ProjectParticipant", ObjectId]] = head
         self.created: date = created
@@ -55,16 +69,16 @@ class Project:
         self.status: consts.ProjectStatus = status
 
     def __iter__(self):
-        yield "id", str(self.project_id)
+        yield "id", str(self._id)
         yield "title", self.title
-        yield "head", dict(self.head) if self.head is not None else None
+        yield "head", self.head
         yield "created", self.created.strftime(config.DATE_FMT)
-        yield "participants", [dict(participant) for participant in self.participants]
-        yield "tasks", [dict(task) for task in self.tasks]
+        yield "participants", [participant for participant in self.participants]
+        yield "tasks", [task for task in self.tasks]
         yield "status", self.status.name
 
 
-class ProjectParticipant:
+class ProjectParticipant(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
@@ -73,21 +87,21 @@ class ProjectParticipant:
             project: Project,
             subscriptions: typing.List[typing.Union["TaskSubscriber", ObjectId]]
     ):
-        self.pp_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.role: consts.RoleEnum = role
         self.user: User = user
         self.project: Project = project
         self.subscriptions: typing.List[typing.Union["TaskSubscriber", ObjectId]] = subscriptions
 
     def __iter__(self):
-        yield "id", str(self.pp_id)
+        yield "id", str(self._id)
         yield "role", self.role.name
-        yield "user", dict(self.user)
-        yield "project", dict(self.project)
-        yield "subscriptions", [dict(subscription) for subscription in self.subscriptions]
+        yield "user", self.user
+        yield "project", self.project
+        yield "subscriptions", [subscription for subscription in self.subscriptions]
 
 
-class Task:
+class Task(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
@@ -106,7 +120,7 @@ class Task:
             files: typing.List[str],
             task_type: consts.TaskType
     ):
-        self.task_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.title: str = title
         self.author: typing.Union[ProjectParticipant, ObjectId] = author
         self.created: datetime = created
@@ -123,9 +137,9 @@ class Task:
         self.task_type: consts.TaskType = task_type
 
     def __iter__(self):
-        yield "id", str(self.task_id)
+        yield "id", str(self._id)
         yield "title", self.title
-        yield "author", dict(self.author)
+        yield "author", self.author
         yield "created", self.created.strftime(config.DATETIME_FMT)
         yield "changed", self.changed.strftime(config.DATETIME_FMT) if self.changed is not None else None
         yield "executor", self.executor
@@ -140,24 +154,24 @@ class Task:
         yield "task_type", self.task_type
 
 
-class TaskSubscriber:
+class TaskSubscriber(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
             task: Task,
             subscriber: ProjectParticipant
     ):
-        self.ts_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.task: Task = task
         self.subscriber: ProjectParticipant = subscriber
 
     def __iter__(self):
-        yield "id", str(self.ts_id)
-        yield "task", dict(self.task)
-        yield "subscriber", dict(self.subscriber)
+        yield "id", str(self._id)
+        yield "task", self.task
+        yield "subscriber", self.subscriber
 
 
-class Comment:
+class Comment(BaseClass):
     def __init__(
             self,
             id_obj: ObjectId,
@@ -167,7 +181,7 @@ class Comment:
             created: datetime,
             edited: typing.Optional[datetime]
     ):
-        self.comment_id: ObjectId = id_obj
+        super().__init__(id_obj)
         self.text: str = text
         self.author: User = author
         self.task: Task = task  # TODO add to classes and schema
@@ -175,9 +189,9 @@ class Comment:
         self.edited: typing.Optional[datetime] = edited
 
     def __iter__(self):
-        yield "id", str(self.comment_id)
+        yield "id", str(self._id)
         yield "text", self.text
-        yield "author", dict(self.author)
-        yield "task", dict(self.task)
+        yield "author", self.author
+        yield "task", self.task
         yield "created", self.created.strftime(config.DATETIME_FMT)
         yield "edited", self.edited.strftime(config.DATETIME_FMT) if self.edited is not None else None

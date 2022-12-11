@@ -6,7 +6,7 @@ from common import consts
 class BaseValidator:
 
     def check_validation(self, input_data):
-        self._validate(input_data)
+        return self._validate(input_data)
 
     def _validate(self, input_data):
         raise NotImplementedError(f"_validate method of {self.__class__.__name__} must be implemented!")
@@ -37,5 +37,13 @@ class NameValidator(BaseValidator):
     def _validate(self, input_data):
         return (
                 isinstance(input_data, str) and
-                (all(char.isalpha() or char == '-' or char == ' ' for char in input_data))
+                all(char.isalpha() or char in '- ' for char in input_data)
+        )
+
+
+class TitleValidator(BaseValidator):
+    def _validate(self, input_data):
+        return (
+                isinstance(input_data, str) and
+                all(char.isalpha() or char.isdigit() or char in '''-+_'"%^* []{}/,.;:()<>#@''' for char in input_data)
         )
