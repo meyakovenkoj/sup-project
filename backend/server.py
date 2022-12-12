@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 
 from common.conf import config
 from common.logger import get_logger
-from common import workers, controllers
+from common import workers, controllers, consts
 
 logger = get_logger(name='main-server')
 app = Flask(__name__, static_url_path='/static', template_folder='/template')
@@ -289,6 +289,31 @@ def project_by_id(project_id):
         }, status_code=200 if project else 404)
     else:
         return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/projects/<string:project_id>/<string:action>', methods=['POST'])
+@login_required
+def project_status_action(project_id, action):
+    try:
+        action = consts.ProjectAction[action]
+    except KeyError:
+        return _json_response({'message': 'Unknown action'}, 400)
+
+    project_controller = controllers.ProjectController()
+    project = project_controller.get_project(project_id)
+    if not project:
+        return _json_response({'message': 'Project not found'}, 404)
+    project = project_controller.perform_action(project=project, user_id=current_user.get_id(), action=action)
+    if not project:
+        return _json_response({'message': 'You cannot perform this action'}, 405)
+
+    return _json_response({
+        'message': 'ok',
+        'data': {
+            'project': project
+        }
+    }, 200)
+
 
 
 @app.route('/')

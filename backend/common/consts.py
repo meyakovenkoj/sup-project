@@ -34,3 +34,9 @@ class TaskStatus(IntEnum):
 MIN_PASSWORD_LEN = 12
 PASSWORD_SIMBOLS = string.ascii_letters + string.digits + string.punctuation
 USERNAME_SIMBOLS = string.ascii_letters + string.digits
+
+
+class ProjectAction(IntEnum):
+    close = 1
+    archive = 2
+    reopen = 3

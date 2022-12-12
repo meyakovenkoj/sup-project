@@ -6,7 +6,7 @@ from bson.errors import InvalidId
 from bson.objectid import ObjectId
 
 from common.logger import get_logger
-from common import workers, consts, validators, cleaners
+from common import workers, consts, validators, cleaners, base
 
 
 class BaseController:
@@ -158,3 +158,33 @@ class ProjectController(BaseController):
                 pp = self.add_user_to_project(user_id, project_id, consts.RoleEnum.head)
             return pp
 
+    def has_action_rights(self, project, user, action: consts.ProjectAction):
+        """This method does not check project status, only roles"""
+        if user.is_admin:
+            return True
+        pp = self._pp_worker.get_by_project_id_and_user_id(project.id, user.id)
+        if pp and action == consts.ProjectAction.close and pp.role == consts.RoleEnum.head:
+            return True
+        return False
+
+    def perform_action(self, project, user_id, action: consts.ProjectAction):
+        user_id = ObjectId(user_id)
+        user = self._user_worker.get_by_id(user_id)
+        if not self.has_action_rights(project, user, action):
+            return False
+
+        if action == consts.ProjectAction.close:
+            if project.status != consts.ProjectStatus.open:
+                return False
+            # TODO: send notification
+            project = self._project_worker.set_status(consts.ProjectStatus.closed, project.id)
+        elif action == consts.ProjectAction.archive:
+            if project.status != consts.ProjectStatus.closed:
+                return False
+            project = self._project_worker.set_status(consts.ProjectStatus.archived, project.id)
+        elif action == consts.ProjectAction.reopen:
+            if project.status != consts.ProjectStatus.archived:
+                return False
+            project = self._project_worker.set_status(consts.ProjectStatus.open, project.id)
+
+        return project

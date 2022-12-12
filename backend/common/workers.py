@@ -179,6 +179,12 @@ class ProjectWorker(BaseDBWorker):
             if res.modified_count > 0:
                 return self.get_by_id(project_id)
 
+    def set_status(self, status: consts.ProjectStatus, project_id: ObjectId) -> typing.Optional[base.Project]:
+        self.logger.info(f'Setting project status')
+        res = self.update(self.db.Project, {'_id': project_id}, {"$set": {'status': status.value}})
+        if res.modified_count > 0:
+            return self.get_by_id(project_id)
+
 
 class ProjectParticipantWorker(BaseDBWorker):
     def _factory(self, cursor):
