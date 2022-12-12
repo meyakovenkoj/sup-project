@@ -37,6 +37,6 @@ USERNAME_SIMBOLS = string.ascii_letters + string.digits
 
 
 class ProjectAction(IntEnum):
-    close = 1
+    finish = 1
     archive = 2
     reopen = 3

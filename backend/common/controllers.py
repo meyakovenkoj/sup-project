@@ -163,7 +163,7 @@ class ProjectController(BaseController):
         if user.is_admin:
             return True
         pp = self._pp_worker.get_by_project_id_and_user_id(project.id, user.id)
-        if pp and action == consts.ProjectAction.close and pp.role == consts.RoleEnum.head:
+        if pp and action == consts.ProjectAction.finish and pp.role == consts.RoleEnum.head:
             return True
         return False
 
@@ -173,7 +173,7 @@ class ProjectController(BaseController):
         if not self.has_action_rights(project, user, action):
             return False
 
-        if action == consts.ProjectAction.close:
+        if action == consts.ProjectAction.finish:
             if project.status != consts.ProjectStatus.open:
                 return False
             # TODO: send notification
