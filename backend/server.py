@@ -107,6 +107,15 @@ def logout():
     return _json_response({'message': 'Successful logout'}, 200)
 
 
+def __project_from_participant(pp):
+    project = pp.project
+    pp.project = project.id
+    if pp in pp.user.projects:
+        pp.user.projects.remove(pp)
+        pp.user.projects.append(pp.id)
+    return project
+
+
 @app.route('/_xhr/project', methods=['POST'])
 @login_required
 def new_project():
@@ -154,17 +163,56 @@ def set_project_head():
         if not pp:
             logger.info('No such project')
             return _json_response({'message': 'No such project'}, 400)
-        project = pp.project
-        pp.project = project.id
-        if pp in pp.user.projects:
-            pp.user.projects.remove(pp)
-            pp.user.projects.append(pp.id)
+
+        project = __project_from_participant(pp)
         logger.info('Project head updated')
         return _json_response(
             {
                 'message': 'Project head updated',
                 'data': {'project': project}
             }, 200)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/project/participant', methods=['POST'])
+@login_required
+def add_participant():
+    data = request.get_json()
+    if data and 'user_id' in data.keys() and 'project_id' in data.keys():
+        user_id = data['user_id']
+        project_id = data['project_id']
+        project_controller = controllers.ProjectController()
+        if not current_user.is_admin() and \
+                not project_controller.is_project_head(
+                    project_id=project_id,
+                    user_id=current_user.get_id()
+                ):
+            return _json_response({'message': "You do not have head or admin rights"}, 405)
+
+        if not controllers.UserController().get_user(user_id):
+            logger.info('No such user')
+            return _json_response({'message': 'No such user'}, 400)
+
+        pp = project_controller.user_in_project(project_id=project_id, user_id=user_id)
+        if pp:
+            status = 200
+            message = 'User already participant'
+        else:
+            pp = project_controller.add_user_to_project(user_id=user_id, project_id=project_id)
+            if not pp:
+                logger.info('No such project')
+                return _json_response({'message': 'No such project'}, 400)
+            status = 201
+            message = 'User added to project'
+
+        project = __project_from_participant(pp)
+        logger.info('User added to project')
+        return _json_response(
+            {
+                'message': message,
+                'data': {'project': project}
+            }, status)
     else:
         return _json_response({'message': 'Bad request'}, 400)
 

@@ -137,6 +137,14 @@ class ProjectController(BaseController):
                     return pp
                 self.logger.error(f'Error occurred with project participant id {pp.id}')
 
+    def user_in_project(self, project_id, user_id):
+        project_id, user_id = ObjectId(project_id), ObjectId(user_id)
+        pp = self._pp_worker.get_by_project_id_and_user_id(project_id, user_id)
+        return pp
+
+    def is_project_head(self, project_id, user_id):
+        pp = self.user_in_project(project_id, user_id)
+        return pp and pp.role == consts.RoleEnum.head
 
     def set_head(self, project_id, user_id):
         project_id, user_id = ObjectId(project_id), ObjectId(user_id)
