@@ -252,3 +252,41 @@ class ProjectParticipantWorker(BaseDBWorker):
         res = self.update(self.db.ProjectParticipant, {'_id': pp_id}, {"$set": {'role': role.value}})
         if res.modified_count > 0:
             return self.get_by_id(pp_id)
+
+
+class TaskWorker(BaseDBWorker):
+    def _factory(self, cursor):
+        return [managers.TaskManager.from_db_dict(task) for task in cursor]
+
+    def get_by_id(self, task_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info('Collecting tasks by id')
+        res = self.select(self.db.Task.find, {"_id": task_id})
+        return res[0] if res else None
+
+    def get_by_title(self, title: str) -> typing.Optional[base.Task]:
+        self.logger.info('Collecting tasks by title')
+        res = self.select(self.db.Task.find, {"title": title})
+        return res[0] if res else None
+
+    def get_by_title_like(self, title_match: str) -> typing.List[base.Task]:
+        self.logger.info('Collecting tasks by title match')
+        rgx = re.compile(f'.*{title_match}.*', re.IGNORECASE)
+        res = self.select(self.db.Task.find, {"title": rgx})
+        return res
+
+    def add_task(self, title: str, description: str, author_id: ObjectId, project_id: ObjectId, files: typing.List[str], task_type: consts.TaskType) -> typing.Optional[base.Task]:
+        self.logger.info('Creating new task')
+        res = self.insert(self.db.Task, {
+            "title": title,
+            "author": author_id,
+            "created": datetime.now().date().strftime(config.DATE_FMT),
+            "description": description,
+            "status": consts.TaskStatus.new.value,
+            "subscribers": [],
+            "project": project_id,
+            "comments": [],
+            "files": [*files],
+            "task_type": task_type.value
+        })
+        if res.inserted_id is not None:
+            return self.get_by_id(res.inserted_id)

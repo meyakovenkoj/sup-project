@@ -61,3 +61,57 @@ class ProjectParticipantManager:
             pp.user.projects.remove(pp.id)
         pp.user.projects.append(pp)
         return pp
+
+
+class TaskManager:
+    @staticmethod
+    def from_db_dict(data):
+        author = data.get('author')
+        if isinstance(author, dict):
+            author = UserManager.from_db_dict(author)
+
+        executor = data.get('executor')
+        if isinstance(executor, dict):
+            executor = UserManager.from_db_dict(executor)
+
+        checker = data.get('checker')
+        if isinstance(checker, dict):
+            checker = UserManager.from_db_dict(checker)
+
+        status = data['status']
+        if isinstance(status, str):
+            status = consts.TaskStatus[status]
+        elif isinstance(status, int):
+            status = consts.TaskStatus(status)
+
+        task_type = data['task_type']
+        if isinstance(task_type, str):
+            task_type = consts.TaskType[task_type]
+        elif isinstance(task_type, int):
+            task_type = consts.TaskType(task_type)
+
+        changed = data.get('changed')
+        if changed:
+            changed = datetime.strptime(changed, config.DATE_FMT)
+
+        accepted = data.get('accepted')
+        if accepted:
+            accepted = datetime.strptime(accepted, config.DATE_FMT)
+
+        return base.Task(
+            id_obj=data['_id'],
+            title=data['title'],
+            author=author,
+            created=datetime.strptime(data['created'], config.DATE_FMT),
+            status=status,
+            task_type=task_type,
+            executor=executor,
+            checker=checker,
+            changed=changed,
+            accepted=accepted,
+            files=data['files'],
+            comments=data['comments'],
+            project=data['project'],
+            description=data['description'],
+            subscribers=data['subscribers']
+        )
