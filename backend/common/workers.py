@@ -185,6 +185,12 @@ class ProjectWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(project_id)
 
+    def add_task(self, project_id: ObjectId, task_id: ObjectId) -> typing.Optional[base.Project]:
+        self.logger.info(f'Adding task to project')
+        res = self.update(self.db.Project, {'_id': project_id}, {"$addToSet": {'tasks': task_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(project_id)
+
 
 class ProjectParticipantWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -194,14 +200,14 @@ class ProjectParticipantWorker(BaseDBWorker):
         users = []
         projects = []
         for pp in cursor:
-            user = [_user for _user in users if pp['user'] != _user.id]
+            user = [_user for _user in users if pp['user'] == _user.id]
             if user:
                 pp['user'] = user[0]
             else:
                 pp['user'] = _user_worker.get_by_id(pp['user'])
                 users.append(pp['user'])
 
-            project = [_project for _project in projects if pp['project'] != _project.id]
+            project = [_project for _project in projects if pp['project'] == _project.id]
             if project:
                 pp['project'] = project[0]
             else:
@@ -253,6 +259,12 @@ class ProjectParticipantWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(pp_id)
 
+    def add_subscription(self, pp_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info(f'Updating project participant subscriptions')
+        res = self.update(self.db.ProjectParticipant, {'_id': pp_id}, {"$addToSet": {'subscriptions': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(pp_id)
+
 
 class TaskWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -274,7 +286,7 @@ class TaskWorker(BaseDBWorker):
         res = self.select(self.db.Task.find, {"title": rgx})
         return res
 
-    def add_task(self, title: str, description: str, author_id: ObjectId, project_id: ObjectId, files: typing.List[str], task_type: consts.TaskType) -> typing.Optional[base.Task]:
+    def add_task(self, title: str, description: str, author_id: ObjectId, project_id: ObjectId, task_type: consts.TaskType) -> typing.Optional[base.Task]:
         self.logger.info('Creating new task')
         res = self.insert(self.db.Task, {
             "title": title,
@@ -285,8 +297,75 @@ class TaskWorker(BaseDBWorker):
             "subscribers": [],
             "project": project_id,
             "comments": [],
-            "files": [*files],
+            "files": [],
             "task_type": task_type.value
+        })
+        if res.inserted_id is not None:
+            return self.get_by_id(res.inserted_id)
+
+    def update_attachments(self, task_id: ObjectId, files: typing.List[str]) -> typing.Optional[base.Task]:
+        self.logger.info(f'Updating task attachments')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'files': files}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def add_subscriber(self, task_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Updating task subscribers')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$addToSet": {'subscribers': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+
+class TaskSubscriberWorker(BaseDBWorker):
+    def _factory(self, cursor):
+        _task_worker = TaskWorker()
+        _pp_worker = ProjectParticipantWorker()
+        res = []
+        tasks = []
+        pps = []
+        for ts in cursor:
+            task = [_task for _task in tasks if ts['task'] == _task.id]
+            if task:
+                ts['task'] = task[0]
+            else:
+                ts['task'] = _task_worker.get_by_id(ts['task'])
+                tasks.append(ts['task'])
+
+            pp = [_pp for _pp in pps if ts['subscriber'] == _pp.id]
+            if pp:
+                ts['subscriber'] = pp[0]
+            else:
+                ts['subscriber'] = _pp_worker.get_by_id(ts['subscriber'])
+                pps.append(ts['subscriber'])
+
+            res.append(managers.TaskSubscriberManager.from_db_dict(ts))
+
+        return res
+
+    def get_by_id(self, ts_id: ObjectId) -> typing.Optional[base.TaskSubscriber]:
+        self.logger.info('Collecting tasks subscribers by id')
+        res = self.select(self.db.TaskSubscriber.find, {"_id": ts_id})
+        return res[0] if res else None
+
+    def get_by_project_participant_id(self, pp_id: ObjectId) -> typing.List[base.TaskSubscriber]:
+        self.logger.info('Collecting tasks subscribers by project participant id')
+        res = self.select(self.db.ProjectParticipant.find, {"subscriber": pp_id})
+        return res
+
+    def get_by_task_id(self, task_id: ObjectId) -> typing.List[base.TaskSubscriber]:
+        self.logger.info('Collecting tasks subscribers by task id')
+        res = self.select(self.db.ProjectParticipant.find, {"task": task_id})
+        return res
+
+    def create_ts(
+            self,
+            task_id: ObjectId,
+            pp_id: ObjectId
+    ) -> typing.Optional[base.TaskSubscriber]:
+        self.logger.info('Creating new task subscriber')
+        res = self.insert(self.db.TaskSubscriber, {
+            "task": task_id,
+            "subscriber": pp_id
         })
         if res.inserted_id is not None:
             return self.get_by_id(res.inserted_id)

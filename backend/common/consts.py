@@ -40,3 +40,13 @@ class ProjectAction(IntEnum):
     finish = 1
     archive = 2
     reopen = 3
+
+
+class TaskAction(IntEnum):
+    set_executor = 1
+    set_tester = 2
+    reopen = 3
+    verify = 4
+    request_correction = 5
+    finish = 6
+    close = 7

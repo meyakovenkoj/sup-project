@@ -35,3 +35,4 @@ reports
 temp_upload
 configs/local.config.json
 /.flask_secret
+attachments

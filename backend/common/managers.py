@@ -115,3 +115,21 @@ class TaskManager:
             description=data['description'],
             subscribers=data['subscribers']
         )
+
+
+class TaskSubscriberManager:
+    @staticmethod
+    def from_db_dict(data):
+        ts = base.TaskSubscriber(
+            id_obj=data['_id'],
+            task=data['task'],
+            subscriber=data['subscriber']
+        )
+
+        if ts.id in ts.task.subscribers:
+            ts.task.subscribers.remove(ts.id)
+        ts.task.subscribers.append(ts)
+        if ts.id in ts.subscriber.subscriptions:
+            ts.subscriber.subscriptions.remove(ts.id)
+        ts.subscriber.subscriptions.append(ts)
+        return ts

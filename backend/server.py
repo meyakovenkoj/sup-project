@@ -3,14 +3,16 @@ import secrets
 
 import simplejson as json
 from pathlib import Path
-from flask import Flask, Response, abort, request
+from flask import Flask, Response, abort, request, session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
+from werkzeug.utils import secure_filename
 
 from common.conf import config
 from common.logger import get_logger
 from common import workers, controllers, consts
+from common import file_worker as fw
 
 logger = get_logger(name='main-server')
 app = Flask(__name__, static_url_path='/static', template_folder='/template')
@@ -48,6 +50,42 @@ def _json_response(data, status_code=200):
     except Exception as e:
         logger.exception(f'Json serialize error: {e}')
         abort(400, 'Invalid json')
+
+
+def _get_json_from_form(json_string):
+    try:
+        return json.loads(json_string)
+    except Exception as e:
+        logger.warning('Invalid data sent')
+        return None
+
+
+def __do_upload(file, folder_name, parent_folder=None):
+    upload_to = fw.create_upload_folder(name=folder_name, parent_folder=parent_folder)
+    logger.debug(f'Upload folder: {upload_to}')
+    filename = secure_filename(file.filename)
+    logger.debug(f'File: {filename}')
+    fw.create_if_not_exists(upload_to)
+    file.save(os.path.join(upload_to, filename))
+    return upload_to
+
+
+def __check_request_file(check_file_existence=True, check_extension=True):
+    # Check file sent in request
+    data = request.get_data()
+    if check_file_existence and ('file' not in request.files or not len(data)):  # TODO fix this
+        return 'Need to send file!', 403
+    # Check file available and valid
+    file = request.files['file']
+    if not file:
+        return 'File cannot be empty!', 403
+    elif file.filename == '':
+        return 'File name cannot be empty!', 403
+    # elif check_extension and not fw.allowed_file(file.filename):
+    #     return 'File extension not allowed!', 403
+    else:
+        return file, None
+
 
 
 @login_manager.user_loader
@@ -315,9 +353,109 @@ def project_status_action(project_id, action):
     }, 200)
 
 
+def __task_from_subscriber(ts):
+    pp = ts.subscriber
+
+    project = pp.project
+    pp.project = project.id
+    if pp in pp.user.projects:
+        pp.user.projects.remove(pp)
+        pp.user.projects.append(pp.id)
+
+    task = ts.task
+    ts.task = task.id
+    if ts in ts.subscriber.subscriptions:
+        ts.subscriber.subscriptions.remove(ts)
+        ts.subscriber.subscriptions.append(ts.id)
+    return project
+
+
+@app.route('/_xhr/tasks', methods=['POST'])
+@login_required
+def new_task():
+    # if not current_user.is_admin():
+    #     return _json_response({'message': "You do not have admin rights"}, 405)
+    data = request.get_json()
+    if data and 'title' in data.keys() and 'description' in data.keys() and 'task_type' in data.keys() and 'project_id' in data.keys():
+        project_id = data['project_id']
+        project_controller = controllers.ProjectController()
+        pp = project_controller.user_in_project(project_id=project_id, user_id=current_user.get_id())
+
+        if not pp:
+            return _json_response({'message': 'Project not found or you cannot create tasks in this project'}, 404)
+
+        title = data['title']
+        description = data['description']
+
+        try:
+            task_type = consts.TaskType[data['task_type']]
+        except KeyError:
+            return _json_response({'message': 'Unknown task_type'}, 400)
+
+        task_controller = controllers.TaskController()
+        if not task_controller.validate_data(title, description):
+            logger.info('Failed title validation')
+            return _json_response({'message': 'Failed title validation'}, 400)
+
+        if not task_controller.check_title_free(title):
+            logger.info('Title already in use')
+            return _json_response({'message': 'Title already in use'}, 400)
+
+        ts = task_controller.create_task(
+            title=title,
+            description=description,
+            task_type=task_type,
+            project_id=project_id,
+            author_id=pp.id
+        )
+        if ts:
+            logger.info('Task created')
+            task = __task_from_subscriber(ts)
+            return _json_response(
+                {
+                    'message': 'Task created',
+                    'data': {'task': task}
+                }, 201)
+        else:
+            logger.info('Failed task creation')
+            return _json_response({'message': 'Task not created'}, 400)
+    else:
+        return _json_response({'message': 'Bad request'}, 400)
+
+
+@app.route('/_xhr/tasks/<string:task_id>/attach', methods=['POST'])
+@login_required
+def upload_file(task_id):
+    file, file_status = __check_request_file()
+    if file_status:
+        return file, file_status
+
+    task_controller = controllers.TaskController()
+    task = task_controller.get_task(task_id)
+    if not task:
+        return 'Task not found', 404
+
+    # project_controller = controllers.ProjectController()
+    # pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
+    #
+    # if not pp:
+    #     return _json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+
+    if task and file:
+        task = task_controller.attach_files(
+            task.id,
+            __do_upload(file, folder_name=str(task.id))
+        )
+    if task:
+        return _json_response({'message': "Files uploaded", 'data': {'task': task}}, 200)
+    return 'Upload failed', 400
+
+
 
 @app.route('/')
 def hello_world():
+    # session.permanent = True
+    # session[config.SID_KEY] = fw.get_ses_id(session=session)
     return 'Hello World!'
 
 

@@ -115,7 +115,7 @@ class Task(BaseClass):
             checker: typing.Optional[typing.Union[ProjectParticipant, ObjectId]],
             status: consts.TaskStatus,
             subscribers: typing.List[typing.Union["TaskSubscriber", ObjectId]],
-            project: Project,
+            project: typing.Union[Project, ObjectId],
             comments: typing.List[typing.Union["Comment", ObjectId]],
             files: typing.List[str],
             task_type: consts.TaskType
@@ -131,7 +131,7 @@ class Task(BaseClass):
         self.checker: typing.Optional[typing.Union[ProjectParticipant, ObjectId]] = checker
         self.status: consts.TaskStatus = status
         self.subscribers: typing.List[typing.Union["TaskSubscriber", ObjectId]] = subscribers
-        self.project: Project = project
+        self.project: typing.Union[Project, ObjectId] = project
         self.comments: typing.List[typing.Union["Comment", ObjectId]] = comments
         self.files: typing.List[str] = files
         self.task_type: consts.TaskType = task_type

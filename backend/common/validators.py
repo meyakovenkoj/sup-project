@@ -47,3 +47,10 @@ class TitleValidator(BaseValidator):
                 isinstance(input_data, str) and
                 all(char.isalpha() or char.isdigit() or char in '''-+_'"%^* []{}/,.;:()<>#@''' for char in input_data)
         )
+
+
+class DescriptionValidator(BaseValidator):
+    def _validate(self, input_data):
+        return (
+                isinstance(input_data, str)
+        )

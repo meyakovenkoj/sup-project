@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 
 from common.logger import get_logger
 from common import workers, consts, validators, cleaners, base
+from common import file_worker as fw
 
 
 class BaseController:
@@ -117,46 +118,55 @@ class ProjectController(BaseController):
         return self._pp_worker.update_role(pp.id, consts.RoleEnum.head)
 
     def add_user_to_project(self, user_id, project_id, role=consts.RoleEnum.worker):
-        project_id, user_id = ObjectId(project_id), ObjectId(user_id)
-        project = self._project_worker.get_by_id(project_id)
-        user = self._user_worker.get_by_id(user_id)
-        if user and project:
-            pp = self._pp_worker.create_pp(user_id, project_id, role)
-            if pp:
-                pp.project = self._project_worker.add_participant(
-                    project_id,
-                    pp.id,
-                    as_head=role == consts.RoleEnum.head)
-                pp.user = self._user_worker.add_project(user_id, pp.id)
-                if pp.project and pp.user:
-                    pp.project.head = pp
-                    pp.project.participants.remove(pp.id)
-                    pp.project.participants.append(pp)
-                    pp.user.projects.remove(pp.id)
-                    pp.user.projects.append(pp)
-                    return pp
-                self.logger.error(f'Error occurred with project participant id {pp.id}')
+        try:
+            project_id, user_id = ObjectId(project_id), ObjectId(user_id)
+            project = self._project_worker.get_by_id(project_id)
+            user = self._user_worker.get_by_id(user_id)
+            if user and project:
+                pp = self._pp_worker.create_pp(user_id, project_id, role)
+                if pp:
+                    pp.project = self._project_worker.add_participant(
+                        project_id,
+                        pp.id,
+                        as_head=role == consts.RoleEnum.head)
+                    pp.user = self._user_worker.add_project(user_id, pp.id)
+                    if pp.project and pp.user:
+                        pp.project.head = pp
+                        pp.project.participants.remove(pp.id)
+                        pp.project.participants.append(pp)
+                        pp.user.projects.remove(pp.id)
+                        pp.user.projects.append(pp)
+                        return pp
+                    self.logger.error(f'Error occurred with project participant id {pp.id}')
+        except InvalidId:
+            pass
 
     def user_in_project(self, project_id, user_id):
-        project_id, user_id = ObjectId(project_id), ObjectId(user_id)
-        pp = self._pp_worker.get_by_project_id_and_user_id(project_id, user_id)
-        return pp
+        try:
+            project_id, user_id = ObjectId(project_id), ObjectId(user_id)
+            pp = self._pp_worker.get_by_project_id_and_user_id(project_id, user_id)
+            return pp
+        except InvalidId:
+            pass
 
     def is_project_head(self, project_id, user_id):
         pp = self.user_in_project(project_id, user_id)
         return pp and pp.role == consts.RoleEnum.head
 
     def set_head(self, project_id, user_id):
-        project_id, user_id = ObjectId(project_id), ObjectId(user_id)
-        user = self._user_worker.get_by_id(user_id)
-        project = self._project_worker.get_by_id(project_id)
-        if user and project:
-            pp = self._pp_worker.get_by_project_id_and_user_id(project_id, user_id)
-            if pp and pp.role != consts.RoleEnum.head:
-                pp = self._update_head(pp)
-            elif not pp:
-                pp = self.add_user_to_project(user_id, project_id, consts.RoleEnum.head)
-            return pp
+        try:
+            project_id, user_id = ObjectId(project_id), ObjectId(user_id)
+            user = self._user_worker.get_by_id(user_id)
+            project = self._project_worker.get_by_id(project_id)
+            if user and project:
+                pp = self._pp_worker.get_by_project_id_and_user_id(project_id, user_id)
+                if pp and pp.role != consts.RoleEnum.head:
+                    pp = self._update_head(pp)
+                elif not pp:
+                    pp = self.add_user_to_project(user_id, project_id, consts.RoleEnum.head)
+                return pp
+        except InvalidId:
+            pass
 
     def has_action_rights(self, project, user, action: consts.ProjectAction):
         """This method does not check project status, only roles"""
@@ -168,10 +178,13 @@ class ProjectController(BaseController):
         return False
 
     def perform_action(self, project, user_id, action: consts.ProjectAction):
-        user_id = ObjectId(user_id)
-        user = self._user_worker.get_by_id(user_id)
-        if not self.has_action_rights(project, user, action):
-            return False
+        try:
+            user_id = ObjectId(user_id)
+            user = self._user_worker.get_by_id(user_id)
+            if not self.has_action_rights(project, user, action):
+                return False
+        except InvalidId:
+            pass
 
         if action == consts.ProjectAction.finish:
             if project.status != consts.ProjectStatus.open:
@@ -188,3 +201,59 @@ class ProjectController(BaseController):
             project = self._project_worker.set_status(consts.ProjectStatus.open, project.id)
 
         return project
+
+
+class TaskController(BaseController):
+    def __init__(self):
+        super().__init__()
+        self._task_worker = workers.TaskWorker()
+        self._ts_worker = workers.TaskSubscriberWorker()
+        self._project_worker = workers.ProjectWorker()
+        # self._user_worker = workers.UserWorker()
+        self._pp_worker = workers.ProjectParticipantWorker()
+
+    def get_task(self, task_id):
+        try:
+            return self._task_worker.get_by_id(ObjectId(task_id))
+        except InvalidId:
+            pass
+
+    def attach_files(self, task_id, upload_to):
+        task = self.get_task(task_id)
+        if task:
+            attachment_info = fw.FileWorker(task).make(from_folder=upload_to)
+            return self._task_worker.update_attachments(task.id, attachment_info)
+
+    def check_title_free(self, title: str) -> bool:
+        return not self._task_worker.get_by_title(cleaners.TitleCleaner.clean(title))
+
+    @staticmethod
+    def validate_data(title, description):
+        return (
+                validators.TitleValidator().check_validation(title) and
+                validators.DescriptionValidator().check_validation(description)
+        )
+
+    def create_task(self, title, description, task_type, project_id, author_id):
+        try:
+            project_id = ObjectId(project_id)
+            author_id = ObjectId(author_id)
+            task = self._task_worker.add_task(
+                title=cleaners.TitleCleaner.clean(title),
+                description=cleaners.TextCleaner.clean(description),
+                project_id=project_id,
+                author_id=author_id,
+                task_type=task_type
+            )
+            if task:
+                project = self._project_worker.add_task(project_id, task.id)
+                if project:
+                    ts = self._ts_worker.create_ts(task.id, author_id)
+                    author = self._pp_worker.add_subscription(author_id, ts.id)
+                    task = self._task_worker.add_subscriber(task.id, ts.id)
+                    ts.task = task
+                    ts.subscriber = author
+                    if task and ts and author:
+                        return ts
+        except InvalidId:
+            pass
