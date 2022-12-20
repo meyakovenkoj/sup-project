@@ -3,7 +3,7 @@ import secrets
 
 import simplejson as json
 from pathlib import Path
-from flask import Flask, Response, abort, request, session
+from flask import Flask, Response, abort, request, send_from_directory
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
@@ -72,8 +72,7 @@ def __do_upload(file, folder_name, parent_folder=None):
 
 def __check_request_file(check_file_existence=True, check_extension=True):
     # Check file sent in request
-    data = request.get_data()
-    if check_file_existence and ('file' not in request.files or not len(data)):  # TODO fix this
+    if check_file_existence and 'file' not in request.files:
         return 'Need to send file!', 403
     # Check file available and valid
     file = request.files['file']
@@ -435,11 +434,11 @@ def upload_file(task_id):
     if not task:
         return 'Task not found', 404
 
-    # project_controller = controllers.ProjectController()
-    # pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
-    #
-    # if not pp:
-    #     return _json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+    project_controller = controllers.ProjectController()
+    pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
+
+    if not pp:
+        return _json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
 
     if task and file:
         task = task_controller.attach_files(
@@ -450,6 +449,17 @@ def upload_file(task_id):
         return _json_response({'message': "Files uploaded", 'data': {'task': task}}, 200)
     return 'Upload failed', 400
 
+
+@app.route('/attachments/<string:project_id>/<string:task_id>/<string:filename>', methods=['GET'])
+@login_required
+def download_attachment(project_id, task_id, filename):
+    task = controllers.TaskController().get_task(task_id)
+    if task and str(task.project) == project_id:
+        pp = controllers.ProjectController().user_in_project(project_id=project_id, user_id=current_user.get_id())
+        if pp:
+            uploads = os.path.join(config.ATTACHMENTS_ROOT, project_id, task_id)
+            return send_from_directory(directory=uploads, path=filename)
+    return _json_response({'message': 'No such task or project or you do not have such rights'}, 404)
 
 
 @app.route('/')

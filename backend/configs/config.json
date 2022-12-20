@@ -6,6 +6,7 @@
   "UPLOAD_FOLDER": "temp_upload",
   "STATIC_FOLDER": "static",
   "ATTACHMENTS_ROOT": "/var/www/html/attachments/",
+  "ATTACHMENTS_SHORT": "attachments",
   "SID_KEY": "sid",
   "MONGO_URI": "mongodb://127.0.0.1:27017/sup_data",
   "DATE_FMT":  "%Y-%m-%d",

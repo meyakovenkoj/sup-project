@@ -11,6 +11,32 @@ from common.base import Task, Project
 
 logger = get_logger('file-utils')
 
+# If you ever want to use it - add your ALLOWED_EXTENSIONS to config.json and fix nginx config (default)
+# def allowed_file(filename):
+#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+#
+# "ALLOWED_EXTENSIONS": [
+#     "html",
+#     "htm",
+#     "pdf",
+#     "zip",
+#     "jpg",
+#     "jpeg",
+#     "png",
+#     "xml",
+#     "log",
+#     "db",
+#     "mp4",
+#     "7z",
+#     "js",
+#     "css",
+#     "woff",
+#     "ttf",
+#     "otf",
+#     "eot",
+#     "svg",
+#     "txt"
+#   ],
 
 def create_if_not_exists(folder):
     if not os.path.exists(folder):
@@ -26,7 +52,7 @@ def rm_folder(folder):
 
 
 def get_relative_path(full_path):
-    return full_path.replace(config.ATTACHMENTS_ROOT, '')
+    return os.path.join(config.ATTACHMENTS_SHORT, full_path.replace(config.ATTACHMENTS_ROOT, ''))
 
 
 def get_ses_id(session: dict, renew=None):
@@ -80,7 +106,17 @@ class FileWorker:
             move_to = self._collect_place_path()
             create_if_not_exists(move_to)
             for f in os.listdir(from_folder):
-                move(os.path.join(from_folder, f), move_to)
+                f_check = f
+                i = 0
+                f_split = f.rsplit('.', 1)
+                f_name = f_split[0]
+                f_ext = f_split[1] if len(f_split) > 1 else None
+                while f_check in os.listdir(move_to):
+                    i += 1
+                    f_check = f'{f_name}({i})'
+                    if f_ext is not None:
+                        f_check += f'.{f_ext}'
+                move(os.path.join(from_folder, f), os.path.join(move_to, f_check))
             rm_folder(from_folder)
         except ResultWorkerException as e:
             logger.error(f'Cannot move from "{from_folder}" to unknown folder.\n{e}')
