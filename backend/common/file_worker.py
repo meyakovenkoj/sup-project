@@ -3,6 +3,7 @@ import random
 import string
 from datetime import datetime
 from shutil import move, rmtree
+from werkzeug.utils import secure_filename
 
 from common.logger import get_logger
 from common.conf import config
@@ -137,3 +138,27 @@ class FileWorker:
             art_path = os.path.join(arts, f)
             attach_paths.append(get_relative_path(art_path))
         return attach_paths
+
+    def remove_files(self, files):
+        attach_paths = []
+        try:
+            task_folder = self._collect_place_path()
+            task_path_start = get_relative_path(task_folder)
+            task_files = os.listdir(task_folder)
+            for file in files:
+                filename = os.path.basename(file)
+                file_full_path = os.path.join(task_folder, filename)
+                if file.startswith(task_path_start) and filename in task_files and os.path.isfile(file_full_path):
+                    os.unlink(file_full_path)
+
+            for f in os.listdir(task_folder):
+                art_path = os.path.join(task_folder, f)
+                attach_paths.append(get_relative_path(art_path))
+        except ResultWorkerException as e:
+            logger.error(f'Cannot remove from unknown folder.\n{e}')
+        except OSError as e:
+            logger.debug(e)
+        except Exception as e:
+            logger.debug(f'Unknown exception: {e}')
+        else:
+            return attach_paths

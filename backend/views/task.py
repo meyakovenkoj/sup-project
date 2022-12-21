@@ -54,7 +54,7 @@ def __task_from_subscriber(ts):
     if ts in ts.subscriber.subscriptions:
         ts.subscriber.subscriptions.remove(ts)
         ts.subscriber.subscriptions.append(ts.id)
-    return project
+    return task
 
 
 @task_view.route('/_xhr/tasks', methods=['POST'])
@@ -135,6 +135,26 @@ def upload_file(task_id):
     return json_response({'message': 'Upload failed'}, 400)
 
 
+@task_view.route('/_xhr/tasks/<string:task_id>/delete_files', methods=['POST'])
+@login_required
+def delete_files(task_id):
+    data = request.get_json()
+    if data and 'files' in data.keys() and isinstance(data['files'], list):
+        user_id = current_user.get_id()
+        task_controller = controllers.TaskController()
+
+        pp = task_controller.user_accessed_task(task_id, user_id)
+
+        if not pp:
+            return json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+
+        task = task_controller.deattach_files(task_id, data['files'])
+
+        if task:
+            return json_response({'message': "Files deleted", 'data': {'task': task}}, 200)
+    return json_response({'message': 'Bad request'}, 400)
+
+
 @task_view.route('/attachments/<string:project_id>/<string:task_id>/<string:filename>', methods=['GET'])
 @login_required
 def download_attachment(project_id, task_id, filename):
@@ -145,3 +165,88 @@ def download_attachment(project_id, task_id, filename):
             uploads = os.path.join(config.ATTACHMENTS_ROOT, project_id, task_id)
             return send_from_directory(directory=uploads, path=filename)
     return json_response({'message': 'No such task or project or you do not have such rights'}, 404)
+
+
+@task_view.route('/_xhr/tasks/<string:task_id>/subscribe', methods=['POST'])
+@login_required
+def subscribe(task_id):
+    user_id = current_user.get_id()
+    task_controller = controllers.TaskController()
+
+    pp = task_controller.user_accessed_task(task_id, user_id)
+
+    if not pp:
+        return json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+
+    ts = task_controller.subscribe_user_to_task(task_id, user_id)
+    if ts:
+        logger.info('User subscribed')
+        task = __task_from_subscriber(ts)
+        return json_response(
+            {
+                'message': 'Subscribed',
+                'data': {'task': task}
+            }, 200)
+
+    logger.info('Failed subscription')
+    return json_response({'message': 'Failed subscription'}, 400)
+
+
+@task_view.route('/_xhr/tasks/<string:task_id>/unsubscribe', methods=['POST'])
+@login_required
+def unsubscribe(task_id):
+    user_id = current_user.get_id()
+    task_controller = controllers.TaskController()
+
+    pp = task_controller.user_accessed_task(task_id, user_id)
+
+    if not pp:
+        return json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+
+    task = task_controller.unsubscribe_user_from_task(task_id, user_id)
+    if task:
+        logger.info('User unsubscribed')
+        return json_response(
+            {
+                'message': 'Unsubscribed',
+                'data': {'task': task}
+            }, 200)
+    elif task is None:
+        return json_response({'message': 'User not subscriber'}, 400)
+    logger.info('Failed unsubscription')
+    return json_response({'message': 'Failed unsubscription'}, 400)
+
+
+@task_view.route('/_xhr/tasks/<string:task_id>/status/<string:action>', methods=['POST'])
+@login_required
+def task_status_action(task_id, action):
+    try:
+        action = consts.TaskAction[action]
+    except KeyError:
+        return json_response({'message': 'Unknown action'}, 400)
+
+    kwargs = {}
+    if action in [consts.TaskAction.set_executor, consts.TaskAction.set_tester]:
+        data = request.get_json()
+        if data and 'pp_id' in data.keys():
+            pp_id = data['pp_id']
+            if not controllers.ProjectController().get_project_participant(pp_id):
+                return json_response({'message': 'Unknown project participant'}, 404)
+            kwargs['pp_id'] = pp_id
+        else:
+            return json_response({'message': 'You need to give project participant in json pp_id for such action'}, 400)
+
+    task_controller = controllers.TaskController()
+    task = task_controller.get_task(task_id)
+    if not task:
+        return json_response({'message': 'Task not found'}, 404)
+    task = task_controller.perform_action(task=task, user_id=current_user.get_id(), action=action, **kwargs)
+    if not task:
+        return json_response({'message': 'You cannot perform this action'}, 405)
+
+    return json_response({
+        'message': 'ok',
+        'data': {
+            'task': task
+        }
+    }, 200)

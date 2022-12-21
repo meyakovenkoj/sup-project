@@ -10,5 +10,9 @@
   "SID_KEY": "sid",
   "MONGO_URI": "mongodb://127.0.0.1:27017/sup_data",
   "DATE_FMT":  "%Y-%m-%d",
-  "DATETIME_FMT": "%Y-%m-%d %H:%M:%S"
+  "DATETIME_FMT": "%Y-%m-%d %H:%M:%S",
+  "MAIL_SUFFIX": ".sup@bk.ru",
+  "MAIL_SERVER": "smtp.mail.ru",
+  "MAIL_PORT": 465,
+  "MAIL_USERNAME": "no-reply.sup@bk.ru"
 }

@@ -78,6 +78,14 @@ class BaseDBWorker:
         self.logger.info(f"Update result: {res.raw_result}, matched={res.matched_count}, modified={res.modified_count}, ack={res.acknowledged}")
         return res
 
+    def delete(self, collection: Collection, *args, one=True):
+        if one:
+            res = collection.delete_one(*args)
+        else:
+            res = collection.delete_many(*args)
+        self.logger.info(f"Delete result: {res.raw_result}, deleted={res.deleted_count}, ack={res.acknowledged}")
+        return res
+
 
 class UserWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -265,6 +273,12 @@ class ProjectParticipantWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(pp_id)
 
+    def remove_subscription(self, pp_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.ProjectParticipant]:
+        self.logger.info(f'Updating project participant subscriptions')
+        res = self.update(self.db.ProjectParticipant, {'_id': pp_id}, {"$pull": {'subscriptions': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(pp_id)
+
 
 class TaskWorker(BaseDBWorker):
     def _factory(self, cursor):
@@ -291,7 +305,7 @@ class TaskWorker(BaseDBWorker):
         res = self.insert(self.db.Task, {
             "title": title,
             "author": author_id,
-            "created": datetime.now().date().strftime(config.DATE_FMT),
+            "created": datetime.now().strftime(config.DATETIME_FMT),
             "description": description,
             "status": consts.TaskStatus.new.value,
             "subscribers": [],
@@ -305,13 +319,43 @@ class TaskWorker(BaseDBWorker):
 
     def update_attachments(self, task_id: ObjectId, files: typing.List[str]) -> typing.Optional[base.Task]:
         self.logger.info(f'Updating task attachments')
-        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'files': files}})
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'files': files, "changed": datetime.now().strftime(config.DATETIME_FMT)}})
         if res.modified_count > 0:
             return self.get_by_id(task_id)
 
     def add_subscriber(self, task_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.Task]:
         self.logger.info(f'Updating task subscribers')
         res = self.update(self.db.Task, {'_id': task_id}, {"$addToSet": {'subscribers': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def remove_subscriber(self, task_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Updating task subscribers')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$pull": {'subscribers': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def set_status(self, status: consts.TaskStatus, task_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Setting task status')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'status': status.value, "changed": datetime.now().strftime(config.DATETIME_FMT)}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def set_executor(self, pp_id: ObjectId, task_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Setting task executor')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'executor': pp_id, "changed": datetime.now().strftime(config.DATETIME_FMT)}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def set_tester(self, pp_id: ObjectId, task_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Setting task checker')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'checker': pp_id, "changed": datetime.now().strftime(config.DATETIME_FMT)}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def set_author(self, pp_id: ObjectId, task_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Setting task author')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$set": {'author': pp_id, "changed": datetime.now().strftime(config.DATETIME_FMT)}})
         if res.modified_count > 0:
             return self.get_by_id(task_id)
 
@@ -349,13 +393,20 @@ class TaskSubscriberWorker(BaseDBWorker):
 
     def get_by_project_participant_id(self, pp_id: ObjectId) -> typing.List[base.TaskSubscriber]:
         self.logger.info('Collecting tasks subscribers by project participant id')
-        res = self.select(self.db.ProjectParticipant.find, {"subscriber": pp_id})
+        res = self.select(self.db.TaskSubscriber.find, {"subscriber": pp_id})
         return res
 
     def get_by_task_id(self, task_id: ObjectId) -> typing.List[base.TaskSubscriber]:
         self.logger.info('Collecting tasks subscribers by task id')
-        res = self.select(self.db.ProjectParticipant.find, {"task": task_id})
+        res = self.select(self.db.TaskSubscriber.find, {"task": task_id})
         return res
+
+    def get_by_task_id_and_project_participant_id(
+            self, pp_id: ObjectId, task_id: ObjectId
+    ) -> typing.Optional[base.TaskSubscriber]:
+        self.logger.info('Collecting tasks subscribers by task_id and pp_id')
+        res = self.select(self.db.TaskSubscriber.find, {"task": task_id, "subscriber": pp_id})
+        return res[0] if res else None
 
     def create_ts(
             self,
@@ -369,3 +420,10 @@ class TaskSubscriberWorker(BaseDBWorker):
         })
         if res.inserted_id is not None:
             return self.get_by_id(res.inserted_id)
+
+    def remove_ts(self, ts_is: ObjectId) -> bool:
+        self.logger.info("Removing subscription")
+        res = self.delete(self.db.TaskSubscriber, {
+            "_id": ts_is
+        }, one=True)
+        return res.deleted_count > 0

@@ -1,4 +1,7 @@
+import os.path
 import string
+import typing
+import urllib.parse
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,6 +11,8 @@ from bson.objectid import ObjectId
 from common.logger import get_logger
 from common import workers, consts, validators, cleaners, base
 from common import file_worker as fw
+from common.mailer import send_message
+from common.conf import config
 
 
 class BaseController:
@@ -91,6 +96,12 @@ class ProjectController(BaseController):
     def get_project(self, project_id):
         try:
             return self._project_worker.get_by_id(ObjectId(project_id))
+        except InvalidId:
+            pass
+
+    def get_project_participant(self, pp_id):
+        try:
+            return self._pp_worker.get_by_id(ObjectId(pp_id))
         except InvalidId:
             pass
 
@@ -184,7 +195,7 @@ class ProjectController(BaseController):
             if not self.has_action_rights(project, user, action):
                 return False
         except InvalidId:
-            pass
+            return False
 
         if action == consts.ProjectAction.finish:
             if project.status != consts.ProjectStatus.open:
@@ -209,8 +220,17 @@ class TaskController(BaseController):
         self._task_worker = workers.TaskWorker()
         self._ts_worker = workers.TaskSubscriberWorker()
         self._project_worker = workers.ProjectWorker()
-        # self._user_worker = workers.UserWorker()
+        self._user_worker = workers.UserWorker()
         self._pp_worker = workers.ProjectParticipantWorker()
+        self._task_actions: typing.Dict[consts.TaskAction, typing.Callable] = {
+            consts.TaskAction.set_executor: self._set_executor,
+            consts.TaskAction.set_tester: self._set_tester,
+            consts.TaskAction.reopen: self._reopen,
+            consts.TaskAction.verify: self._verify,
+            consts.TaskAction.request_correction: self._request_correction,
+            consts.TaskAction.finish: self._finish,
+            consts.TaskAction.close: self._close,
+        }
 
     def get_task(self, task_id):
         try:
@@ -223,6 +243,13 @@ class TaskController(BaseController):
         if task:
             attachment_info = fw.FileWorker(task).make(from_folder=upload_to)
             return self._task_worker.update_attachments(task.id, attachment_info)
+
+    def deattach_files(self, task_id, files):
+        task = self.get_task(task_id)
+        if task:
+            attachment_info = fw.FileWorker(task).remove_files(files)
+            if attachment_info is not None:
+                return self._task_worker.update_attachments(task.id, attachment_info)
 
     def check_title_free(self, title: str) -> bool:
         return not self._task_worker.get_by_title(cleaners.TitleCleaner.clean(title))
@@ -257,3 +284,159 @@ class TaskController(BaseController):
                         return ts
         except InvalidId:
             pass
+
+    def user_accessed_task(self, task_id, user_id):
+        task = self.get_task(task_id)
+        if task:
+            return ProjectController().user_in_project(project_id=task.project, user_id=user_id)
+
+    def subscribe_user_to_task(self, task_id, user_id):
+        try:
+            task_id = ObjectId(task_id)
+            user_id = ObjectId(user_id)
+            task = self._task_worker.get_by_id(task_id)
+            if task:
+                pp = self._pp_worker.get_by_project_id_and_user_id(task.project, user_id)
+                if pp:
+                    ts = self._ts_worker.get_by_task_id_and_project_participant_id(pp.id, task.id)
+                    if ts:
+                        return ts
+
+                    ts = self._ts_worker.create_ts(task.id, pp.id)
+                    pp = self._pp_worker.add_subscription(pp.id, ts.id)
+                    task = self._task_worker.add_subscriber(task.id, ts.id)
+                    ts.task = task
+                    ts.subscriber = pp
+                    if task and ts and pp:
+                        return ts
+        except InvalidId:
+            pass
+
+    def unsubscribe_user_from_task(self, task_id, user_id):
+        try:
+            task_id = ObjectId(task_id)
+            user_id = ObjectId(user_id)
+            task = self._task_worker.get_by_id(task_id)
+            if task:
+                pp = self._pp_worker.get_by_project_id_and_user_id(task.project, user_id)
+                if pp:
+                    ts = self._ts_worker.get_by_task_id_and_project_participant_id(pp.id, task.id)
+                    if ts:
+                        pp = self._pp_worker.remove_subscription(pp.id, ts.id)
+                        task = self._task_worker.remove_subscriber(task.id, ts.id)
+                        ts = self._ts_worker.remove_ts(ts.id)
+                        if pp and task and ts:
+                            return task
+                        else:
+                            return False
+        except InvalidId:
+            pass
+
+    def has_action_rights(self, task, user, action: consts.TaskAction):
+        """This method does not check task status, only roles"""
+        pp = self._pp_worker.get_by_project_id_and_user_id(task.project, user.id)
+        if pp:
+            if pp.role == consts.RoleEnum.head:
+                return True
+            elif action == consts.TaskAction.finish:
+                return task.executor == pp.id
+            elif action in [consts.TaskAction.verify, consts.TaskAction.request_correction]:
+                return task.checker == pp.id
+            return action == consts.TaskAction.reopen
+        return False
+
+    def _set_executor(self, task, **kwargs):
+        if task.status not in [consts.TaskStatus.new, consts.TaskStatus.reopened, consts.TaskStatus.open, consts.TaskStatus.correction]:
+            return False
+        if kwargs and 'pp_id' in kwargs.keys():
+            try:
+                ex_id = ObjectId(kwargs['pp_id'])
+            except InvalidId:
+                return False
+            else:
+                executor = self._pp_worker.get_by_id(ex_id)
+                if not executor:
+                    return False
+                if task.executor != ex_id:
+                    task = self._task_worker.set_executor(ex_id, task.id)
+                    ts = self.subscribe_user_to_task(task.id, executor.user.id)
+                    if ts:
+                        task_url = urllib.parse.urljoin(config.SERVER_NAME, f"task/{str(task.id)}")
+                        by_user = kwargs['__by_user__']
+                        message = f'For task {task_url} @{executor.user.username} has been set as executor by user @{by_user.username}'
+                        self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
+                if task:
+                    return self._task_worker.set_status(consts.TaskStatus.open, task.id)
+
+    def _set_tester(self, task, **kwargs):
+        # TODO: send to test
+        if task.status != consts.TaskStatus.ready:
+            return False
+        if kwargs and 'pp_id' in kwargs.keys():
+            try:
+                tester_id = ObjectId(kwargs['pp_id'])
+            except InvalidId:
+                return False
+            else:
+                tester = self._pp_worker.get_by_id(tester_id)
+                if not tester:
+                    return False
+                if task.checker != tester_id:
+                    task = self._task_worker.set_tester(tester_id, task.id)
+                    ts = self.subscribe_user_to_task(task.id, tester.user.id)
+                    if ts:
+                        task_url = urllib.parse.urljoin(config.SERVER_NAME, f"task/{str(task.id)}")
+                        by_user = kwargs['__by_user__']
+                        message = f'For task {task_url} @{tester.user.username} has been set as tester by user @{by_user.username}'
+                        self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
+                if task:
+                    return self._task_worker.set_status(consts.TaskStatus.verification, task.id)
+
+    def _reopen(self, task, **kwargs):
+        if task.status != consts.TaskStatus.closed:
+            return False
+        by_user = kwargs['__by_user__']
+        pp = self._pp_worker.get_by_project_id_and_user_id(task.project, by_user.id)
+        if pp:
+            task = self._task_worker.set_author(pp.id, task.id)
+            return self._task_worker.set_status(consts.TaskStatus.reopened, task.id)
+
+    def _verify(self, task, **kwargs):
+        if task.status != consts.TaskStatus.verification:
+            return False
+        return self._task_worker.set_status(consts.TaskStatus.closed, task.id)
+
+    def _request_correction(self, task, **kwargs):
+        if task.status != consts.TaskStatus.verification:
+            return False
+        return self._task_worker.set_status(consts.TaskStatus.correction, task.id)
+
+    def _finish(self, task, **kwargs):
+        if task.status in [consts.TaskStatus.open, consts.TaskStatus.correction]:
+            return False
+        return self._task_worker.set_status(consts.TaskStatus.ready, task.id)
+
+    def _close(self, task, **kwargs):
+        return self._task_worker.set_status(consts.TaskStatus.closed, task.id)
+
+    def _send_notification(self, message, subscribers):
+        receivers = [subscriber.subscriber.user for subscriber in subscribers]
+        send_message(message, receivers)
+
+    def perform_action(self, task, user_id, action: consts.TaskAction, **kwargs):
+        try:
+            user_id = ObjectId(user_id)
+            user = self._user_worker.get_by_id(user_id)
+            if not self.has_action_rights(task, user, action):
+                return False
+        except InvalidId:
+            return False
+
+        kwargs['__by_user__'] = user
+        old_status = task.status
+        task = self._task_actions[action](task, **kwargs)
+        if task and old_status != task.status:
+            task_url = urllib.parse.urljoin(config.SERVER_NAME, f"task/{str(task.id)}")
+            message = f'For task {task_url} has been changed status to {task.status.name} by user @{user.username}'
+            self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
+        return task

@@ -146,12 +146,12 @@ class Task(BaseClass):
         yield "accepted", self.accepted.strftime(config.DATETIME_FMT) if self.accepted is not None else None
         yield "description", self.description
         yield "checker", self.checker
-        yield "status", self.status
+        yield "status", self.status.name
         yield "subscribers", self.subscribers
         yield "project", self.project
         yield "comments", self.comments
         yield "files", self.files
-        yield "task_type", self.task_type
+        yield "task_type", self.task_type.name
 
 
 class TaskSubscriber(BaseClass):

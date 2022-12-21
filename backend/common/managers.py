@@ -92,17 +92,17 @@ class TaskManager:
 
         changed = data.get('changed')
         if changed:
-            changed = datetime.strptime(changed, config.DATE_FMT)
+            changed = datetime.strptime(changed, config.DATETIME_FMT)
 
         accepted = data.get('accepted')
         if accepted:
-            accepted = datetime.strptime(accepted, config.DATE_FMT)
+            accepted = datetime.strptime(accepted, config.DATETIME_FMT)
 
         return base.Task(
             id_obj=data['_id'],
             title=data['title'],
             author=author,
-            created=datetime.strptime(data['created'], config.DATE_FMT),
+            created=datetime.strptime(data['created'], config.DATETIME_FMT),
             status=status,
             task_type=task_type,
             executor=executor,

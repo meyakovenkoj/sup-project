@@ -33,6 +33,16 @@ server {
         uwsgi_pass unix:/var/www/sup-server/sup.sock;
     }
 
+    location ^~ /_xhr/ {
+        include uwsgi_params;
+        uwsgi_pass unix:/var/www/sup-server/sup.sock;
+    }
+
+    location ^~ /attachments/ {
+        include uwsgi_params;
+        uwsgi_pass unix:/var/www/sup-server/sup.sock;
+    }
+
     location ^~ /static/  {
         include  /etc/nginx/mime.types;
         root /var/www/sup-server/;

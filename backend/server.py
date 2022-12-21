@@ -9,6 +9,7 @@ from common.conf import config
 from common.json_response import json_response
 from common.logger import get_logger
 from common import workers, controllers
+from common.mailer import mail
 
 from views.task import task_view
 from views.project import project_view
@@ -22,12 +23,19 @@ app = Flask(__name__, static_url_path='/static', template_folder='/template')
 app.register_blueprint(task_view)
 app.register_blueprint(project_view)
 
+app.config['MAIL_SERVER'] = config.MAIL_SERVER
+app.config['MAIL_PORT'] = config.MAIL_PORT
+app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = config.MAIL_PWD
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 
 app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
 
 app.config["MONGO_URI"] = config.MONGO_URI
 mongo = PyMongo(app)
+mail.init_app(app)
 
 SECRET_FILE_PATH = Path(config.SECRET_KEY_FILENAME)
 try:
