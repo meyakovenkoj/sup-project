@@ -27,13 +27,13 @@ def __do_upload(file, folder_name, parent_folder=None):
 def __check_request_file(check_file_existence=True, check_extension=True):
     # Check file sent in request
     if check_file_existence and 'file' not in request.files:
-        return 'Need to send file!', 403
+        return json_response({'message': 'Need to send file!'}, 403)
     # Check file available and valid
     file = request.files['file']
     if not file:
-        return 'File cannot be empty!', 403
+        return json_response({'message': 'File cannot be empty!'}, 403)
     elif file.filename == '':
-        return 'File name cannot be empty!', 403
+        return json_response({'message': 'File name cannot be empty!'}, 403)
     # elif check_extension and not fw.allowed_file(file.filename):
     #     return 'File extension not allowed!', 403
     else:
@@ -60,8 +60,6 @@ def __task_from_subscriber(ts):
 @task_view.route('/_xhr/tasks', methods=['POST'])
 @login_required
 def new_task():
-    # if not current_user.is_admin():
-    #     return json_response({'message': "You do not have admin rights"}, 405)
     data = request.get_json()
     if data and 'title' in data.keys() and 'description' in data.keys() and 'task_type' in data.keys() and 'project_id' in data.keys():
         project_id = data['project_id']
@@ -82,11 +80,11 @@ def new_task():
         task_controller = controllers.TaskController()
         if not task_controller.validate_data(title, description):
             logger.info('Failed title validation')
-            return json_response({'message': 'Failed title validation'}, 400)
+            return json_response({'message': 'Failed data validation'}, 400)
 
-        if not task_controller.check_title_free(title):
-            logger.info('Title already in use')
-            return json_response({'message': 'Title already in use'}, 400)
+        # if not task_controller.check_title_free(title):
+        #     logger.info('Title already in use')
+        #     return json_response({'message': 'Title already in use'}, 400)
 
         ts = task_controller.create_task(
             title=title,
@@ -119,11 +117,10 @@ def upload_file(task_id):
 
     task_controller = controllers.TaskController()
     task = task_controller.get_task(task_id)
-    if not task:
-        return 'Task not found', 404
-
-    project_controller = controllers.ProjectController()
-    pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
+    pp = None
+    if task:
+        project_controller = controllers.ProjectController()
+        pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
 
     if not pp:
         return json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
@@ -134,8 +131,8 @@ def upload_file(task_id):
             __do_upload(file, folder_name=str(task.id))
         )
     if task:
-        return json_response({'message': "Files uploaded", 'data': {'task': task}}, 200)
-    return 'Upload failed', 400
+        return json_response({'message': "File uploaded", 'data': {'task': task}}, 200)
+    return json_response({'message': 'Upload failed'}, 400)
 
 
 @task_view.route('/attachments/<string:project_id>/<string:task_id>/<string:filename>', methods=['GET'])
