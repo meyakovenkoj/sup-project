@@ -231,7 +231,7 @@ def task_status_action(task_id, action):
         if data and 'pp_id' in data.keys():
             pp_id = data['pp_id']
             if not controllers.ProjectController().get_project_participant(pp_id):
-                return json_response({'message': 'Unknown project participant'}, 404)
+                return json_response({'message': 'Unknown project participant'}, 400)
             kwargs['pp_id'] = pp_id
         else:
             return json_response({'message': 'You need to give project participant in json pp_id for such action'}, 400)
