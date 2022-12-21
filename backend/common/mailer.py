@@ -14,7 +14,7 @@ mail = Mail()
 
 def send_message(message, to_users: typing.List[base.User]):
     try:
-        recipients = [f'{user.username}{config.MAIL_SUFFIX}' for user in to_users]
+        recipients = [f'{user.username}{config.MAIL_SUFFIX if "@" not in user.username else ""}' for user in to_users]
         logger.info(f'Sending messages')
         msg = Message('Sup notification', sender=config.MAIL_USERNAME, recipients=recipients)
         msg.body = message
