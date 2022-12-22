@@ -19,7 +19,7 @@ from views.user import user_view
 
 logger = get_logger(name='main-server')
 app = Flask(__name__, static_url_path='/static', template_folder='/template')
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # register views
 app.register_blueprint(task_view)
