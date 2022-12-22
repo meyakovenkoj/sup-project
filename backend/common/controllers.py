@@ -230,6 +230,7 @@ class TaskController(BaseController):
         self._project_worker = workers.ProjectWorker()
         self._user_worker = workers.UserWorker()
         self._pp_worker = workers.ProjectParticipantWorker()
+        self._com_worker = workers.CommentWorker()
         self._task_actions: typing.Dict[consts.TaskAction, typing.Callable] = {
             consts.TaskAction.set_executor: self._set_executor,
             consts.TaskAction.set_tester: self._set_tester,
@@ -361,6 +362,54 @@ class TaskController(BaseController):
                             return False
         except InvalidId:
             pass
+
+    def validate_comment(self, text):
+        return validators.DescriptionValidator().check_validation(text)
+
+    def comment_task(self, task_id, user_id, text):
+        try:
+            user_id = ObjectId(user_id)
+            user = self._user_worker.get_by_id(user_id)
+        except InvalidId:
+            return
+
+        task = self.get_task(task_id)
+        if user and task:
+            pp = self._pp_worker.get_by_project_id_and_user_id(task.project, user.id)
+            if pp:
+                com = self._com_worker.create_comment(task.id, user.id, text=cleaners.TextCleaner().clean(text))
+                if com:
+                    return self._task_worker.add_comment(task.id, com.id)
+
+    def get_comment(self, com_id):
+        try:
+            com_id = ObjectId(com_id)
+            return self._com_worker.get_by_id(com_id)
+        except InvalidId:
+            pass
+
+    def remove_comment(self, com_id):
+        try:
+            com_id = ObjectId(com_id)
+            com = self._com_worker.get_by_id(com_id)
+        except InvalidId:
+            return
+
+        if com:
+            task = self._task_worker.remove_comment(com.task, com.id)
+            if task:
+                return self._com_worker.remove_comment(com.id)
+
+    def edit_comment(self, com_id, new_text):
+        try:
+            com_id = ObjectId(com_id)
+            com = self._com_worker.get_by_id(com_id)
+        except InvalidId:
+            return
+
+        if com:
+            if self._com_worker.edit_comment(com.id, cleaners.TextCleaner().clean(new_text)):
+                return self._task_worker.get_by_id(com.task)
 
     def has_action_rights(self, task, user, action: consts.TaskAction):
         """This method does not check task status, only roles"""

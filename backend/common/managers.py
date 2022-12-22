@@ -65,7 +65,7 @@ class ProjectParticipantManager:
 
 class TaskManager:
     @staticmethod
-    def from_db_dict(data):
+    def from_db_dict(data, comments):
         author = data.get('author')
         if isinstance(author, dict):
             author = UserManager.from_db_dict(author)
@@ -110,7 +110,7 @@ class TaskManager:
             changed=changed,
             accepted=accepted,
             files=data['files'],
-            comments=data['comments'],
+            comments=comments,
             project=data['project'],
             description=data['description'],
             subscribers=data['subscribers']
@@ -133,3 +133,17 @@ class TaskSubscriberManager:
             ts.subscriber.subscriptions.remove(ts.id)
         ts.subscriber.subscriptions.append(ts)
         return ts
+
+
+class CommentManager:
+    @staticmethod
+    def from_db_dict(data):
+        comment = base.Comment(
+            id_obj=data['_id'],
+            task=data['task'],
+            author=data['author'],
+            created=datetime.strptime(data['created'], config.DATETIME_FMT),
+            edited=datetime.strptime(data['edited'], config.DATETIME_FMT) if 'edited' in data.keys() else None,
+            text=data['text']
+        )
+        return comment

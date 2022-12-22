@@ -176,15 +176,15 @@ class Comment(BaseClass):
             self,
             id_obj: ObjectId,
             text: str,
-            author: User,
-            task: Task,
+            author: typing.Union[User, ObjectId],
+            task: typing.Union[Task, ObjectId],
             created: datetime,
             edited: typing.Optional[datetime]
     ):
         super().__init__(id_obj)
         self.text: str = text
-        self.author: User = author
-        self.task: Task = task  # TODO add to classes and schema
+        self.author: typing.Union[User, ObjectId] = author
+        self.task: typing.Union[Task, ObjectId] = task  # TODO add to classes and schema
         self.created: datetime = created
         self.edited: typing.Optional[datetime] = edited
 

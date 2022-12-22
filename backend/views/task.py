@@ -276,3 +276,81 @@ def task_by_title():
             "tasks": filtered_tasks
         }
     }, status_code=200)
+
+
+@task_view.route('/_xhr/tasks/<string:task_id>/comment', methods=['POST'])
+@login_required
+def comment_task(task_id):
+    data = request.get_json()
+    if data and 'text' in data.keys():
+        user_id = current_user.get_id()
+        task_controller = controllers.TaskController()
+        task = task_controller.get_task(task_id)
+        if task:
+            if controllers.ProjectController().user_in_project(project_id=task.project, user_id=user_id):
+                text = data['text']
+                if task_controller.validate_comment(text=text):
+                    task = task_controller.comment_task(task_id, user_id, text)
+                    if task:
+                        return json_response({
+                            'message': 'ok',
+                            'data': {
+                                'task': task
+                            }
+                        }, 201)
+                    return json_response({'message': 'Commenting failed.'}, 400)
+                else:
+                    return json_response({'message': 'Failed text validation.'}, 400)
+        return json_response({'message': 'No such task or you are not in project.'}, 404)
+    return json_response({'message': 'Bad request'}, 400)
+
+
+@task_view.route('/_xhr/comment/<string:comment_id>/edit', methods=['POST'])
+@login_required
+def comment_edit(comment_id):
+    data = request.get_json()
+    if data and 'text' in data.keys():
+        user_id = current_user.get_id()
+        task_controller = controllers.TaskController()
+        com = task_controller.get_comment(comment_id)
+        if com:
+            if str(com.author) == str(user_id):
+                text = data['text']
+                if task_controller.validate_comment(text=text):
+                    task = task_controller.edit_comment(comment_id, text)
+                    if task:
+                        return json_response({
+                            'message': 'ok',
+                            'data': {
+                                'task': task
+                            }
+                        }, 200)
+                    return json_response({'message': 'Editing failed.'}, 400)
+                else:
+                    return json_response({'message': 'Failed text validation.'}, 400)
+        return json_response({'message': 'No such comment or you are not author.'}, 404)
+    return json_response({'message': 'Bad request'}, 400)
+
+
+@task_view.route('/_xhr/comment/<string:comment_id>/delete', methods=['POST'])
+@login_required
+def comment_delete(comment_id):
+    user_id = current_user.get_id()
+    task_controller = controllers.TaskController()
+    com = task_controller.get_comment(comment_id)
+    if com:
+        task_id = com.task
+        if str(com.author) == str(user_id):
+            if task_controller.remove_comment(comment_id):
+                task = task_controller.get_task(task_id)
+                if task:
+                    return json_response({
+                        'message': 'ok',
+                        'data': {
+                            'task': task
+                        }
+                    }, 200)
+                return json_response({'message': 'Something went wrong.'}, 400)
+            else:
+                return json_response({'message': 'Remove failed.'}, 400)
+    return json_response({'message': 'No such comment or you are not author.'}, 404)

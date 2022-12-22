@@ -282,7 +282,10 @@ class ProjectParticipantWorker(BaseDBWorker):
 
 class TaskWorker(BaseDBWorker):
     def _factory(self, cursor):
-        return [managers.TaskManager.from_db_dict(task) for task in cursor]
+        return [managers.TaskManager.from_db_dict(
+            task,
+            comments=CommentWorker().get_by_task_id(task['_id'])  # XXX: Maybe bad idea
+        ) for task in cursor]
 
     def get_by_id(self, task_id: ObjectId) -> typing.Optional[base.Task]:
         self.logger.info('Collecting tasks by id')
@@ -339,9 +342,21 @@ class TaskWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(task_id)
 
+    def add_comment(self, task_id: ObjectId, com_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Updating task comments')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$addToSet": {'comments': com_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
     def remove_subscriber(self, task_id: ObjectId, ts_id: ObjectId) -> typing.Optional[base.Task]:
         self.logger.info(f'Updating task subscribers')
         res = self.update(self.db.Task, {'_id': task_id}, {"$pull": {'subscribers': ts_id}})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
+    def remove_comment(self, task_id: ObjectId, com_id: ObjectId) -> typing.Optional[base.Task]:
+        self.logger.info(f'Updating task comments')
+        res = self.update(self.db.Task, {'_id': task_id}, {"$pull": {'comments': com_id}})
         if res.modified_count > 0:
             return self.get_by_id(task_id)
 
@@ -435,5 +450,59 @@ class TaskSubscriberWorker(BaseDBWorker):
         self.logger.info("Removing subscription")
         res = self.delete(self.db.TaskSubscriber, {
             "_id": ts_is
+        }, one=True)
+        return res.deleted_count > 0
+
+
+class CommentWorker(BaseDBWorker):
+    def _factory(self, cursor):
+        return [managers.CommentManager.from_db_dict(com) for com in cursor]
+
+    def get_by_id(self, com_id: ObjectId) -> typing.Optional[base.Comment]:
+        self.logger.info('Collecting comments by id')
+        res = self.select(self.db.Comment.find, {"_id": com_id})
+        return res[0] if res else None
+
+    def get_by_author_id(self, author_id: ObjectId) -> typing.List[base.Comment]:
+        self.logger.info('Collecting comments by author_id')
+        res = self.select(self.db.Comment.find, {"author": author_id})
+        return res
+
+    def get_by_task_id(self, task_id: ObjectId) -> typing.List[base.Comment]:
+        self.logger.info('Collecting comments by task id')
+        res = self.select(self.db.Comment.find, {"task": task_id})
+        return res
+
+    def create_comment(
+            self,
+            task_id: ObjectId,
+            author_id: ObjectId,
+            text: str
+    ) -> typing.Optional[base.Comment]:
+        self.logger.info('Creating new comment')
+        res = self.insert(self.db.Comment, {
+            "task": task_id,
+            "author": author_id,
+            "text": text,
+            "created": datetime.now().strftime(config.DATETIME_FMT),
+        })
+        if res.inserted_id is not None:
+            return self.get_by_id(res.inserted_id)
+
+    def edit_comment(
+            self,
+            com_id: ObjectId,
+            new_text: str
+    ) -> typing.Optional[base.Comment]:
+        self.logger.info(f'Editing comment')
+        res = self.update(self.db.Comment, {'_id': com_id},
+                          {"$set": {'text': new_text, "edited": datetime.now().strftime(config.DATETIME_FMT)}})
+        if res.modified_count > 0:
+            return self.get_by_id(com_id)
+
+    def remove_comment(self, com_id: ObjectId) -> bool:
+        self.logger.info("Removing comments")
+        res = self.delete(self.db.Comment, {
+            "_id": com_id
         }, one=True)
         return res.deleted_count > 0
