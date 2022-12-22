@@ -191,6 +191,26 @@ def project_by_id(project_id):
         return json_response({'message': 'Bad request'}, 400)
 
 
+@project_view.route('/_xhr/projects/participant/<string:pp_id>', methods=['GET'])
+@login_required
+def pp_by_id(pp_id):
+    if pp_id:
+        project_controller = controllers.ProjectController()
+        pp = project_controller.get_project_participant(pp_id)
+        if pp and current_user.is_admin() or project_controller.user_in_project(pp.project.id, current_user.get_id()):
+            pp.project = pp.project.id
+            pp.user.projects = []
+            return json_response(data={
+                "data": {
+                    "pp": pp
+                }
+            }, status_code=200 if pp else 404)
+        else:
+            return json_response({'message': 'Project participant not found or you are do not have rights for it'}, 404)
+    else:
+        return json_response({'message': 'Bad request'}, 400)
+
+
 @project_view.route('/_xhr/projects/<string:project_id>/<string:action>', methods=['POST'])
 @login_required
 def project_status_action(project_id, action):
