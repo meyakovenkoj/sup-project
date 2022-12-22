@@ -187,6 +187,18 @@ def project_by_id(project_id):
                 if tsk:
                     tasks.append(tsk)
             project.tasks = tasks
+            pps = []
+            for _pp in project.participants:
+                pp = project_controller.get_project_participant(_pp)
+                pp.project = pp.project.id
+                pp.user.projects = []
+                if _pp:
+                    pps.append(pp)
+            project.participants = pps
+            pp = project_controller.get_project_participant(project.head)
+            pp.project = pp.project.id
+            pp.user.projects = []
+            project.head = pp
             return json_response(data={
                 "data": {
                     "project": project
