@@ -319,6 +319,23 @@ def task_by_title():
     }, status_code=200)
 
 
+@task_view.route('/_xhr/tasks/<string:task_id>', methods=['GET'])
+@login_required
+def task_by_id(task_id):
+    user_id = current_user.get_id()
+    task = controllers.TaskController().get_task(task_id)
+
+    if task:
+        project_controller = controllers.ProjectController()
+        if project_controller.user_in_project(task.project, user_id):
+            return json_response(data={
+                "data": {
+                    "task": task
+                }
+            }, status_code=200)
+    return json_response({'message': 'No such task or you are not in project.'}, 404)
+
+
 @task_view.route('/_xhr/tasks/<string:task_id>/comment', methods=['POST'])
 @login_required
 def comment_task(task_id):
