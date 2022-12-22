@@ -384,6 +384,20 @@ class TaskWorker(BaseDBWorker):
         if res.modified_count > 0:
             return self.get_by_id(task_id)
 
+    def edit_task(
+            self, task_id: ObjectId, title: str, description: str, task_type: consts.TaskType
+    ) -> typing.Optional[base.Task]:
+        self.logger.info(f'Editing task info')
+        res = self.update(self.db.Task, {'_id': task_id},
+                          {"$set": {
+                              "title": title,
+                              "description": description,
+                              "task_type": task_type.value,
+                              "changed": datetime.now().strftime(config.DATETIME_FMT)
+                          }})
+        if res.modified_count > 0:
+            return self.get_by_id(task_id)
+
 
 class TaskSubscriberWorker(BaseDBWorker):
     def _factory(self, cursor):

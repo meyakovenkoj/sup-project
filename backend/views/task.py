@@ -106,7 +106,48 @@ def new_task():
             return json_response({'message': 'Task not created'}, 400)
     else:
         return json_response({'message': 'Bad request'}, 400)
-    
+
+
+@task_view.route('/_xhr/tasks/<string:task_id>/edit', methods=['POST'])
+@login_required
+def task_edit(task_id):
+    data = request.get_json()
+    if data and ('title' in data.keys() or 'description' in data.keys() or 'task_type' in data.keys()):
+        task_controller = controllers.TaskController()
+        task = task_controller.get_task(task_id)
+        pp = None
+        if task:
+            project_controller = controllers.ProjectController()
+            pp = project_controller.user_in_project(project_id=task.project, user_id=current_user.get_id())
+
+        if not pp:
+            return json_response({'message': 'Task not found or you cannot update tasks in this project'}, 404)
+
+        title = data['title'] if 'title' in data.keys() else task.title
+        description = data['description'] if 'description' in data.keys() else task.description
+
+        try:
+            task_type = consts.TaskType[data['task_type']] if 'task_type' in data.keys() else task.task_type
+        except KeyError:
+            return json_response({'message': 'Unknown task_type'}, 400)
+
+        if not task_controller.validate_data(title, description):
+            logger.info('Failed title validation')
+            return json_response({'message': 'Failed data validation'}, 400)
+
+        task = task_controller.edit_task(task_id, title, description, task_type)
+        if task:
+            return json_response(
+                {
+                    'message': 'Task updated',
+                    'data': {'task': task}
+                }, 200)
+        else:
+            logger.info('Failed task edit')
+            return json_response({'message': 'Task not edited'}, 400)
+
+    return json_response({'message': 'Bad request'}, 400)
+
 
 @task_view.route('/_xhr/tasks/<string:task_id>/attach', methods=['POST'])
 @login_required

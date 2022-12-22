@@ -413,6 +413,30 @@ class TaskController(BaseController):
             if self._com_worker.edit_comment(com.id, cleaners.TextCleaner().clean(new_text)):
                 return self._task_worker.get_by_id(com.task)
 
+    def edit_task(self, task_id, title=None, description=None, task_type=None):
+        task = self.get_task(task_id)
+
+        if task:
+            if title is None:
+                title = task.title
+            else:
+                title = cleaners.TitleCleaner().clean(title)
+
+            if description is None:
+                description = task.description
+            else:
+                description = cleaners.TextCleaner().clean(description)
+
+            if task_type is None:
+                task_type = task.task_type
+
+            if title == task.title and description == task.description and task_type == task.task_type:  # don't change
+                return task
+
+            return self._task_worker.edit_task(task.id, title, description, task_type)
+
+
+
     def has_action_rights(self, task, user, action: consts.TaskAction):
         """This method does not check task status, only roles"""
         pp = self._pp_worker.get_by_project_id_and_user_id(task.project, user.id)
