@@ -208,8 +208,10 @@ class ProjectController(BaseController):
         if action == consts.ProjectAction.finish:
             if project.status != consts.ProjectStatus.open:
                 return False
-            # TODO: send notification
             project = self._project_worker.set_status(consts.ProjectStatus.closed, project.id)
+            __tc = TaskController()
+            for task_id in project.tasks:
+                __tc.notify_project_closing(task_id)
         elif action == consts.ProjectAction.archive:
             if project.status != consts.ProjectStatus.closed:
                 return False
@@ -519,3 +521,11 @@ class TaskController(BaseController):
             message = f'For task {task_url} has been changed status to {task.status.name} by user @{user.username}'
             self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
         return task
+
+    def notify_project_closing(self, task_id):
+        task = self.get_task(task_id)
+        if task:
+            task_url = urllib.parse.urljoin(config.SERVER_NAME, f"task/{str(task.id)}")
+            project_url = urllib.parse.urljoin(config.SERVER_NAME, f"project/{str(task.project)}")
+            message = f'Project {project_url} is closing! Task {task_url} not closed yet.'
+            self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
