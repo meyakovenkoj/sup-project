@@ -49,8 +49,8 @@ class UserLogin:
     def get_name(self):
         return self.__user.username if self.__user else None
 
-    def is_admin(self):
-        return self.__user.is_admin if self.__user else None
+    def is_admin(self):  # TODO nope
+        return True#self.__user.is_admin if self.__user else None
 
 
 # DATABASE WORKERS
