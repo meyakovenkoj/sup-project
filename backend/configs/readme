@@ -1,0 +1,26 @@
+1. Put 'sup.service' into /etc/systemd/system or make symlink
+2. Put 'default' into /etc/nginx/sites-enabled/
+3. create virtualenv and install flask and uwsgi in it
+4. start service
+5. restart nginx
+
+# Install service
+# make code backup
+sudo service sup stop
+cd /var/www/backup
+sudo mkdir <yyyymmdd>
+sudo cp -r /var/www/sup-server/* ./
+sudo chown -R virt:www-data .
+cd /var/www/sup-server
+sudo rm -r !(sup-server)
+# copy code
+scp -r .\* virt@sup-server.rd.ptsecurity.ru:/var/www/sup-server
+# delete config
+rm configs/local.config.json
+rm logs/*
+
+# make new service
+sudo systemctl start sup.service
+sudo systemctl status sup.service
+# If started OK - add it to autostart
+sudo systemctl enable sup.service

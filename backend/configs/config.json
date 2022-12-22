@@ -1,0 +1,19 @@
+{
+  "SERVER_NAME": "https://v1517237.hosted-by-vdsina.ru/",
+  "TEST_SERVER_URL": "https://localhost/_xhr/start_test_zaglushka",
+  "LOGLEVEL": 20,
+  "LOGFILE": "logs/server.log",
+  "SECRET_KEY_FILENAME": ".flask_secret",
+  "UPLOAD_FOLDER": "temp_upload",
+  "STATIC_FOLDER": "static",
+  "ATTACHMENTS_ROOT": "/var/www/html/attachments/",
+  "ATTACHMENTS_SHORT": "attachments",
+  "SID_KEY": "sid",
+  "MONGO_URI": "mongodb://127.0.0.1:27017/sup_data",
+  "DATE_FMT":  "%Y-%m-%d",
+  "DATETIME_FMT": "%Y-%m-%d %H:%M:%S",
+  "MAIL_SUFFIX": ".sup@bk.ru",
+  "MAIL_SERVER": "smtp.mail.ru",
+  "MAIL_PORT": 465,
+  "MAIL_USERNAME": "no-reply.sup@bk.ru"
+}

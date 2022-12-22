@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI with sup project
+After=network.target
+
+[Service]
+User=virt
+Group=www-data
+WorkingDirectory=/var/www/sup-server/
+Environment="PATH=/var/www/sup-server/sup_env/bin"
+ExecStart=/var/www/sup-server/sup_env/bin/uwsgi --ini sup.ini
+
+[Install]
+WantedBy=multi-user.target
