@@ -180,30 +180,31 @@ def project_by_id(project_id):
         project_controller = controllers.ProjectController()
         if current_user.is_admin() or project_controller.user_in_project(project_id, current_user.get_id()):
             project = project_controller.get_project(project_id)
-            tasks = []
-            tc = controllers.TaskController()
-            for task in project.tasks:
-                tsk = tc.get_task(task)
-                if tsk:
-                    tasks.append(tsk)
-            project.tasks = tasks
-            pps = []
-            for _pp in project.participants:
-                pp = project_controller.get_project_participant(_pp)
+            if project:
+                tasks = []
+                tc = controllers.TaskController()
+                for task in project.tasks:
+                    tsk = tc.get_task(task)
+                    if tsk:
+                        tasks.append(tsk)
+                project.tasks = tasks
+                pps = []
+                for _pp in project.participants:
+                    pp = project_controller.get_project_participant(_pp)
+                    pp.project = pp.project.id
+                    pp.user.projects = []
+                    if _pp:
+                        pps.append(pp)
+                project.participants = pps
+                pp = project_controller.get_project_participant(project.head)
                 pp.project = pp.project.id
                 pp.user.projects = []
-                if _pp:
-                    pps.append(pp)
-            project.participants = pps
-            pp = project_controller.get_project_participant(project.head)
-            pp.project = pp.project.id
-            pp.user.projects = []
-            project.head = pp
-            return json_response(data={
-                "data": {
-                    "project": project
-                }
-            }, status_code=200 if project else 404)
+                project.head = pp
+                return json_response(data={
+                    "data": {
+                        "project": project
+                    }
+                }, status_code=200 if project else 404)
         else:
             return json_response({'message': 'Project not found or you are do not have rights for it'}, 404)
     else:

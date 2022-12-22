@@ -149,7 +149,7 @@ def users():
 
 
 # XXX for pokaz
-@app.route('/projects', methods=['GET'])
+@app.route('/_projects', methods=['GET'])
 @login_required
 def projects():
     projects_list = mongo.db.Project.find({})
@@ -160,7 +160,7 @@ def projects():
         }
     })
 
-@app.route('/tasks', methods=['GET'])
+@app.route('/_tasks', methods=['GET'])
 @login_required
 def tasks():
     tasks_list = mongo.db.Task.find({})
