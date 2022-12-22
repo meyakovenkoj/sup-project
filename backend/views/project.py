@@ -180,6 +180,13 @@ def project_by_id(project_id):
         project_controller = controllers.ProjectController()
         if current_user.is_admin() or project_controller.user_in_project(project_id, current_user.get_id()):
             project = project_controller.get_project(project_id)
+            tasks = []
+            tc = controllers.TaskController()
+            for task in project.tasks:
+                tsk = tc.get_task(task)
+                if tsk:
+                    tasks.append(tsk)
+            project.tasks = tasks
             return json_response(data={
                 "data": {
                     "project": project
