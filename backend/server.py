@@ -148,5 +148,30 @@ def users():
     })
 
 
+# XXX for pokaz
+@app.route('/projects', methods=['GET'])
+@login_required
+def projects():
+    projects_list = mongo.db.Project.find({})
+    logger.info(projects_list)
+    return json_response(data={
+        "data": {
+            "projects": list(projects_list)
+        }
+    })
+
+@app.route('/tasks', methods=['GET'])
+@login_required
+def tasks():
+    tasks_list = mongo.db.Task.find({})
+    logger.info(tasks_list)
+    return json_response(data={
+        "data": {
+            "tasks": list(tasks_list)
+        }
+    })
+
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True, threaded=True)
