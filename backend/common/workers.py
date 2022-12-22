@@ -289,15 +289,25 @@ class TaskWorker(BaseDBWorker):
         res = self.select(self.db.Task.find, {"_id": task_id})
         return res[0] if res else None
 
-    def get_by_title(self, title: str) -> typing.Optional[base.Task]:
+    def get_by_title(self, title: str) -> typing.Optional[base.Project]:
         self.logger.info('Collecting tasks by title')
         res = self.select(self.db.Task.find, {"title": title})
-        return res[0] if res else None
+        return res
 
     def get_by_title_like(self, title_match: str) -> typing.List[base.Task]:
         self.logger.info('Collecting tasks by title match')
         rgx = re.compile(f'.*{title_match}.*', re.IGNORECASE)
         res = self.select(self.db.Task.find, {"title": rgx})
+        return res
+
+    def get_by_pp_assigned(self, pp_id: ObjectId) -> typing.List[base.Task]:
+        self.logger.info('Collecting tasks by project participant')
+        query = '''function() {'''\
+            f'''
+               return (this.executor == "{pp_id}" || this.tester == "{pp_id}")
+            '''\
+            '''}'''
+        res = self.select(self.db.Task.find, {"$where": query})
         return res
 
     def add_task(self, title: str, description: str, author_id: ObjectId, project_id: ObjectId, task_type: consts.TaskType) -> typing.Optional[base.Task]:

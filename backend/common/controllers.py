@@ -152,6 +152,14 @@ class ProjectController(BaseController):
         except InvalidId:
             pass
 
+    def get_user_projects(self, user_id):
+        try:
+            user_id = ObjectId(user_id)
+            pps = self._pp_worker.get_by_user_id(user_id)
+            return pps
+        except InvalidId:
+            pass
+
     def user_in_project(self, project_id, user_id):
         try:
             project_id, user_id = ObjectId(project_id), ObjectId(user_id)
@@ -237,6 +245,28 @@ class TaskController(BaseController):
             return self._task_worker.get_by_id(ObjectId(task_id))
         except InvalidId:
             pass
+
+    def get_task_by_title(self, title):
+        return self._task_worker.get_by_title(cleaners.TitleCleaner.clean(title))
+
+    def find_task_by_title(self, title_match):
+        return self._task_worker.get_by_title_like(cleaners.TitleCleaner.clean(title_match))
+
+    def get_tasks_by_pp_id(self, pp_id):
+        try:
+            return self._task_worker.get_by_pp_assigned(ObjectId(pp_id))
+        except InvalidId:
+            pass
+
+    def get_tasks_by_user_assignments(self, user_id):
+        user = UserController().get_user(user_id)
+        tasks = []
+        if user:
+            for pp in user.projects:
+                pp_tasks = self._task_worker.get_by_pp_assigned(pp)
+                if pp_tasks:
+                    tasks.extend(pp_tasks)
+        return tasks
 
     def attach_files(self, task_id, upload_to):
         task = self.get_task(task_id)

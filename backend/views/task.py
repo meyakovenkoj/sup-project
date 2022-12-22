@@ -250,3 +250,29 @@ def task_status_action(task_id, action):
             'task': task
         }
     }, 200)
+
+
+@task_view.route('/_xhr/tasks', methods=['GET'])
+@login_required
+def task_by_title():
+    title = request.args.get('title')
+    title_match = request.args.get('title_match')
+    filtered_tasks = []
+    user_id = current_user.get_id()
+    if title:
+        task_list = controllers.TaskController().get_task_by_title(title)
+    elif title_match:
+        task_list = controllers.TaskController().find_task_by_title(title_match)
+    else:
+        task_list = filtered_tasks = controllers.TaskController().get_tasks_by_user_assignments(user_id)
+
+    if not filtered_tasks:
+        project_controller = controllers.ProjectController()
+        for task in task_list:
+            if project_controller.user_in_project(task.project, user_id):
+                filtered_tasks.append(task)
+    return json_response(data={
+        "data": {
+            "tasks": filtered_tasks
+        }
+    }, status_code=200)

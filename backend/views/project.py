@@ -19,6 +19,15 @@ def __project_from_participant(pp):
     return project
 
 
+def __project_only_from_participant(pp):
+    project = pp.project
+    pp.project = project.id
+    project.participants.remove(pp)
+    project.participants.append(pp.id)
+    project.head = project.head.id
+    return project
+
+
 @project_view.route('/_xhr/project', methods=['POST'])
 @login_required
 def new_project():
@@ -125,34 +134,59 @@ def add_participant():
 def project_by_title():
     title = request.args.get('title')
     title_match = request.args.get('title_match')
+    project_controller = controllers.ProjectController()
     if title:
-        project = controllers.ProjectController().get_project_by_title(title)
-        return json_response(data={
-            "data": {
-                "project": project
-            }
-        }, status_code=200 if project else 404)
+        project = project_controller.get_project_by_title(title)
+        if current_user.is_admin() or project and project_controller.user_in_project(project.id, current_user.get_id()):
+            return json_response(data={
+                "data": {
+                    "project": project
+                }
+            }, status_code=200 if project else 404)
+        else:
+            return json_response({'message': 'Project not found or you are do not have rights for it'}, 404)
     elif title_match:
-        projects_list = controllers.ProjectController().find_project_by_title(title_match)
+        projects_list = project_controller.find_project_by_title(title_match)
+        if current_user.is_admin():
+            return json_response(data={
+                "data": {
+                    "projects": projects_list
+                }
+            }, status_code=200 if projects_list else 404)
+        else:
+            filtered_projects = []
+            for project in projects_list:
+                if project_controller.user_in_project(project.id, current_user.get_id()):
+                    filtered_projects.append(project)
+            return json_response(data={
+                "data": {
+                    "projects": filtered_projects
+                }
+            }, status_code=200 if filtered_projects else 404)
+    else:
+        pps = project_controller.get_user_projects(current_user.get_id())
+        projects_list = [__project_only_from_participant(pp) for pp in pps]
         return json_response(data={
             "data": {
                 "projects": projects_list
             }
         }, status_code=200 if projects_list else 404)
-    else:
-        return json_response({'message': 'Bad request'}, 400)
 
 
 @project_view.route('/_xhr/projects/<string:project_id>', methods=['GET'])
 @login_required
 def project_by_id(project_id):
     if project_id:
-        project = controllers.ProjectController().get_project(project_id)
-        return json_response(data={
-            "data": {
-                "project": project
-            }
-        }, status_code=200 if project else 404)
+        project_controller = controllers.ProjectController()
+        if current_user.is_admin() or project_controller.user_in_project(project_id, current_user.get_id()):
+            project = project_controller.get_project(project_id)
+            return json_response(data={
+                "data": {
+                    "project": project
+                }
+            }, status_code=200 if project else 404)
+        else:
+            return json_response({'message': 'Project not found or you are do not have rights for it'}, 404)
     else:
         return json_response({'message': 'Bad request'}, 400)
 
