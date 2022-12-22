@@ -13,6 +13,7 @@ from common.mailer import mail
 
 from views.task import task_view
 from views.project import project_view
+from views.user import user_view
 
 
 logger = get_logger(name='main-server')
@@ -22,6 +23,12 @@ app = Flask(__name__, static_url_path='/static', template_folder='/template')
 # register views
 app.register_blueprint(task_view)
 app.register_blueprint(project_view)
+app.register_blueprint(user_view)
+
+#zaglushka
+if 'localhost' in config.TEST_SERVER_URL:
+    from views.zaglushka import zaglushka_view
+    app.register_blueprint(zaglushka_view)
 
 app.config['MAIL_SERVER'] = config.MAIL_SERVER
 app.config['MAIL_PORT'] = config.MAIL_PORT

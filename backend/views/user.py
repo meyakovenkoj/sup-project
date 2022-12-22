@@ -1,20 +1,15 @@
-import os
-
-from flask import Blueprint, request, send_from_directory
-from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
+from flask import Blueprint, request
+from flask_login import login_required
 
 from common import controllers, consts
 from common.logger import get_logger
 from common.json_response import json_response
-from common import file_worker as fw
-from common.conf import config
 
 logger = get_logger(name="user-views")
-task_view = Blueprint("user_view", __name__)
+user_view = Blueprint("user_view", __name__)
 
 
-@task_view.route('/_xhr/users', methods=['GET'])
+@user_view.route('/_xhr/users', methods=['GET'])
 @login_required
 def user_by_username():
     username = request.args.get('username')
@@ -37,7 +32,7 @@ def user_by_username():
         return json_response({'message': 'Bad request'}, 400)
 
 
-@task_view.route('/_xhr/users/<string:user_id>', methods=['GET'])
+@user_view.route('/_xhr/users/<string:user_id>', methods=['GET'])
 @login_required
 def user_by_id(user_id):
     if user_id:

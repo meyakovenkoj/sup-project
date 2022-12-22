@@ -1,5 +1,3 @@
-import os.path
-import string
 import typing
 import urllib.parse
 
@@ -9,7 +7,8 @@ from bson.errors import InvalidId
 from bson.objectid import ObjectId
 
 from common.logger import get_logger
-from common import workers, consts, validators, cleaners, base
+from common import workers, consts, validators, cleaners
+from common.test_request import request_test
 from common import file_worker as fw
 from common.mailer import send_message
 from common.conf import config
@@ -474,7 +473,6 @@ class TaskController(BaseController):
                     return self._task_worker.set_status(consts.TaskStatus.open, task.id)
 
     def _set_tester(self, task, **kwargs):
-        # TODO: send to test
         if task.status != consts.TaskStatus.ready:
             return False
         if kwargs and 'pp_id' in kwargs.keys():
@@ -495,6 +493,7 @@ class TaskController(BaseController):
                         message = f'For task {task_url} @{tester.user.username} has been set as tester by user @{by_user.username}'
                         self._send_notification(message, self._ts_worker.get_by_task_id(task.id))
                 if task:
+                    request_test({"task_id": str(task.id), "description": task.description, "tester": tester.user.username})
                     return self._task_worker.set_status(consts.TaskStatus.verification, task.id)
 
     def _reopen(self, task, **kwargs):
@@ -517,7 +516,7 @@ class TaskController(BaseController):
         return self._task_worker.set_status(consts.TaskStatus.correction, task.id)
 
     def _finish(self, task, **kwargs):
-        if task.status in [consts.TaskStatus.open, consts.TaskStatus.correction]:
+        if task.status not in [consts.TaskStatus.open, consts.TaskStatus.correction]:
             return False
         return self._task_worker.set_status(consts.TaskStatus.ready, task.id)
 
