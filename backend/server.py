@@ -4,6 +4,7 @@ from pathlib import Path
 from flask import Flask, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_pymongo import PyMongo
+from flask_cors import CORS
 
 from common.conf import config
 from common.json_response import json_response
@@ -18,7 +19,7 @@ from views.user import user_view
 
 logger = get_logger(name='main-server')
 app = Flask(__name__, static_url_path='/static', template_folder='/template')
-
+CORS(app)
 
 # register views
 app.register_blueprint(task_view)
