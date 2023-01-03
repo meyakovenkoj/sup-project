@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
-import { Modal, Menu, Button, Space, Typography, Avatar, Dropdown } from "antd";
+import { Modal, Menu, Button, Space, Typography, Avatar, Dropdown, Input } from "antd";
 import { UserOutlined, DownOutlined } from "@ant-design/icons";
-import Search from "./MySearch";
 import TaskModal from "../Pages/Task/TaskModal";
 import { connect } from "react-redux";
-import { Logout } from "../../redux/actions/actions";
+import { Logout, searchTask } from "../../redux/actions/actions";
+const { Search } = Input;
 
 const { Title } = Typography;
 
-const HeaderBar = ({ location, Logout }) => {
+const HeaderBar = ({ location, Logout, searchTask}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
@@ -24,6 +24,9 @@ const HeaderBar = ({ location, Logout }) => {
   const handleLogout = () => {
     Logout();
   }
+  const onSearch = (value) => {
+    searchTask(value);
+  };
   const items = [
     {
       label: <Link to="/profile">Profile</Link>,
@@ -65,7 +68,7 @@ const HeaderBar = ({ location, Logout }) => {
             </Button>
           </Menu.Item>
           <Menu.Item key="search">
-            <Search></Search>
+            <Search onSearch={onSearch}></Search>
           </Menu.Item>
           <Menu.Item key="user">
             <Dropdown
@@ -108,7 +111,8 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  Logout: () => dispatch(Logout())
+  Logout: () => dispatch(Logout()),
+  searchTask: (title) => dispatch(searchTask(title))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(HeaderBar));

@@ -2,14 +2,14 @@ import React, { useLayoutEffect, useState } from "react";
 import { Layout, Menu, Card } from "antd";
 import Project from "./Project";
 import SearchBar from "../../Header/SearchBar";
-import { getProjects } from "../../../redux/actions/actions";
+import { getProjects, searchProject } from "../../../redux/actions/actions";
 import { connect } from "react-redux";
 
 const { Header, Content, Footer, Sider } = Layout;
 
 
 
-const ProjectSearch = ({ component, element, projects, getProjects }) => {
+const ProjectSearch = ({ component, element, projects, getProjects, searchProject }) => {
   useLayoutEffect(() => {
     getProjects();
   }, []);
@@ -20,7 +20,11 @@ const ProjectSearch = ({ component, element, projects, getProjects }) => {
   }
 
   const searchFunc = (data) => {
-    getProjects();
+    if(data === '') {
+      getProjects();
+    } else {
+      searchProject(data);
+    }
   }
   return (
   <Layout style={{ height: "100%" }}>
@@ -55,13 +59,14 @@ const ProjectSearch = ({ component, element, projects, getProjects }) => {
 const mapStateToProps = (state) => {
   return {
     loading: state.authUser.loading,
-    users: state.authUser.users
+    users: state.authUser.users,
+    projects: state.authUser.projects
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
   getProjects: () => dispatch(getProjects()),
-  // searchProject: (title) => dispatch(searchProject(title))
+  searchProject: (title) => dispatch(searchProject(title))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProjectSearch);

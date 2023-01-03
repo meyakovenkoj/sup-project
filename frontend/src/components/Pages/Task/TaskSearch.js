@@ -4,13 +4,13 @@ import { Card } from "antd";
 import Task from "./Task";
 import SearchBar from "../../Header/SearchBar";
 import { connect } from "react-redux";
-import { getTasks } from "../../../redux/actions/actions";
+import { getTasks, searchTask } from "../../../redux/actions/actions";
 
 const { Header, Content, Footer, Sider } = Layout;
 
 
 
-const TaskSearch = ({ component, element, getTasks, tasks }) => {
+const TaskSearch = ({ component, element, getTasks, tasks , searchTask}) => {
   useLayoutEffect(() => {
     getTasks();
   }, []);
@@ -21,7 +21,11 @@ const TaskSearch = ({ component, element, getTasks, tasks }) => {
   }
 
   const searchFunc = (data) => {
-    getTasks();
+    if(data === '') {
+      getTasks();
+    } else {
+      searchTask(data);
+    }
   }
   return (
     <Layout style={{ height: "100%" }}>
@@ -62,6 +66,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   getTasks: () => dispatch(getTasks()),
+  searchTask: (title) => dispatch(searchTask(title))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(TaskSearch);

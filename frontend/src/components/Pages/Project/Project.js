@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Button, Layout, List, Modal, Typography } from "antd";
 import ProjectModal from "./ProjectModal";
-import Search from "../../Header/MySearch";
+import { connect } from "react-redux";
+import { getUsers } from "../../../redux/actions/actions";
+
 const { Title } = Typography;
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -89,7 +91,7 @@ const Project = (props) => {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <ProjectModal></ProjectModal>
+        <ProjectModal users={props.users}></ProjectModal>
       </Modal>
       <Modal
         title="Close"
@@ -97,10 +99,21 @@ const Project = (props) => {
         onOk={handleAddOk}
         onCancel={handleAddCancel}
       >
-        <Search></Search>
+        
       </Modal>
     </div>
   );
 };
 
-export default Project;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading,
+    users: state.authUser.users
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  getUsers: () => dispatch(getUsers()),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Project);

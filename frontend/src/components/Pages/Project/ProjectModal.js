@@ -14,97 +14,24 @@ const onSearch = (value) => {
   console.log("search:", value);
 };
 
-const ProjectModal = () => (
+const ProjectModal = (props) => (
   <>
     <Title level={5}>Title</Title>
 
     <Input placeholder="Basic usage" />
-    <Title level={5}>Task</Title>
 
-    <TextArea rows={6} placeholder="maxLength is 6" maxLength={6} />
     <Row>
       <Col>
-        <Title level={5}>Project</Title>
-
-        <Select
+      <Select
           showSearch
           placeholder="Select status"
           optionFilterProp="children"
           onChange={onChange}
           onSearch={onSearch}
           filterOption={(input, option) =>
-            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            (option?.username ?? "").toLowerCase().includes(input.toLowerCase())
           }
-          options={[
-            {
-              value: "solve",
-              label: "Solve",
-            },
-            {
-              value: "wontfixed",
-              label: "Won't Fixed",
-            },
-            {
-              value: "closed",
-              label: "Closed",
-            },
-          ]}
-        />
-      </Col>
-      <Col>
-        <Title level={5}>Worker</Title>
-
-        <Select
-          showSearch
-          placeholder="Select status"
-          optionFilterProp="children"
-          onChange={onChange}
-          onSearch={onSearch}
-          filterOption={(input, option) =>
-            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={[
-            {
-              value: "solve",
-              label: "Solve",
-            },
-            {
-              value: "wontfixed",
-              label: "Won't Fixed",
-            },
-            {
-              value: "closed",
-              label: "Closed",
-            },
-          ]}
-        />
-      </Col>
-      <Col>
-        <Title level={5}>Type</Title>
-
-        <Select
-          showSearch
-          placeholder="Select status"
-          optionFilterProp="children"
-          onChange={onChange}
-          onSearch={onSearch}
-          filterOption={(input, option) =>
-            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={[
-            {
-              value: "solve",
-              label: "Solve",
-            },
-            {
-              value: "wontfixed",
-              label: "Won't Fixed",
-            },
-            {
-              value: "closed",
-              label: "Closed",
-            },
-          ]}
+          options={props.users}
         />
       </Col>
     </Row>

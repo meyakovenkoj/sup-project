@@ -94,7 +94,7 @@ export function Logout() {
           const usrs = res.data.data.users;
           var users = [];
             usrs.forEach(item => {
-            var elem = {...item, key:item.username, label:item.username};
+            var elem = {...item, key:item.id, label:item.username};
             users.push(elem);
             });
           dispatch({type: 'SET_USERS', users});
@@ -136,7 +136,7 @@ export function Logout() {
           const usrs = res.data.data.users;
           var users = [];
             usrs.forEach(item => {
-            var elem = {...item, key:item.username, label:item.username};
+            var elem = {...item, key:item.id, label:item.username};
             users.push(elem);
             });
           dispatch({type: 'SET_USERS', users});
@@ -151,12 +151,33 @@ export function Logout() {
 export function getProjects() {
     return (dispatch) => {
       axios
-        .get(url+'/_xhr/projects', {withCredentials: true})
+        .get(url+'/projects', {withCredentials: true})
         .then((res) => {
           const projs = res.data.data.projects;
           var projects = [];
           projs.forEach(item => {
-          var elem = {...item, key:item.title, label:item.title};
+          var elem = {...item, key:item.id, label:item.title};
+          projects.push(elem);
+          });
+          dispatch({ type: 'SET_PROJECTS', projects })
+        })
+        .catch((err) => {
+          // alert(err);
+          alert(err.response.data.message)
+        })
+    }
+  }
+
+
+  export function searchProject(title) {
+    return (dispatch) => {
+      axios
+        .get(url+'/_xhr/projects', {params: {title_match:title}, withCredentials: true})
+        .then((res) => {
+          const projs = res.data.data.projects;
+          var projects = [];
+          projs.forEach(item => {
+          var elem = {...item, key:item.id, label:item.title};
           projects.push(elem);
           });
           dispatch({ type: 'SET_PROJECTS', projects })
@@ -247,18 +268,40 @@ export function getProjects() {
     };
   }
 
-  export function getTasks() {
+  export function searchTask(title) {
     return (dispatch) => {
       axios
       .get(
         url+'/_xhr/tasks',
+        {params: {title_match:title}, withCredentials: true}
+      )
+        .then((res) => {
+            const tsks = res.data.data.tasks;
+            var tasks = [];
+            tsks.forEach(item => {
+            var elem = {...item, key:item.id, label:item.title};
+            tasks.push(elem);
+            });
+            dispatch({ type: 'SET_TASKS', tasks })
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function getTasks() {
+    return (dispatch) => {
+      axios
+      .get(
+        url+'/tasks',
         {withCredentials: true}
       )
         .then((res) => {
             const tsks = res.data.data.tasks;
             var tasks = [];
             tsks.forEach(item => {
-            var elem = {...item, key:item.title, label:item.title};
+            var elem = {...item, key:item.id, label:item.title};
             tasks.push(elem);
             });
             dispatch({ type: 'SET_TASKS', tasks })
@@ -371,6 +414,62 @@ export function getProjects() {
       axios
       .post(
         url+'/_xhr/tasks/'+task_id + '/unsubscribe',
+        {
+        },
+        {withCredentials: true}
+      )
+        .then((res) => {
+            alert(res);
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function addComment(task_id, text) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/tasks/'+task_id + '/comment',
+        {
+            text: text
+        },
+        {withCredentials: true}
+      )
+        .then((res) => {
+            alert(res);
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function editComment(comment_id, text) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/comment/'+comment_id + '/edit',
+        {
+            text: text
+        },
+        {withCredentials: true}
+      )
+        .then((res) => {
+            alert(res);
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function deleteComment(comment_id) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/comment/'+comment_id + '/delete',
         {
         },
         {withCredentials: true}
