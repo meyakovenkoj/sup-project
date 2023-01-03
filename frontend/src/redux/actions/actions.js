@@ -152,7 +152,7 @@ export function Logout() {
 export function getProjects() {
     return (dispatch) => {
       axios
-        .get(url+'/projects', {withCredentials: true})
+        .get(url+'/_projects', {withCredentials: true})
         .then((res) => {
           const projs = res.data.data.projects;
           var projects = [];
@@ -352,7 +352,7 @@ export function getProjects() {
     return (dispatch) => {
       axios
       .get(
-        url+'/tasks',
+        url+'/_tasks',
         {withCredentials: true}
       )
         .then((res) => {

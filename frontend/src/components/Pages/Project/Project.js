@@ -11,7 +11,8 @@ const { Header, Content, Footer, Sider } = Layout;
 
 
 const Project = (props) => {
-  const {projectId} = useParams();
+  const {projId} = useParams();
+  const projectId = projId ? projId : props.projId;
   useEffect(() => {
     props.getProject(projectId);
   }, []);

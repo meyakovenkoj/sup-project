@@ -43,7 +43,7 @@ const ProjectSearch = ({ component, element, projects, getProjects, searchProjec
         </Sider>
         <Content style={{ padding: "0 24px", minHeight: 280 }}>
           <Card>
-            <Project  data={selectedProject}></Project>
+            <Project  data={selectedProject} projId={selectedProject._id}></Project>
           </Card>
         </Content>
       </Layout>
