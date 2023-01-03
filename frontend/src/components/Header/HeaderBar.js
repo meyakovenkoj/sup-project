@@ -10,6 +10,9 @@ import TaskModal from './TaskModal';
 import { Typography } from 'antd';
 import { Col, Divider, Row } from 'antd';
 import { Avatar } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { Dropdown } from 'antd';
+
 const { Title } = Typography;
 
 
@@ -28,6 +31,19 @@ const HeaderBar = ({
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  const items = [
+    {
+      label: <Link to="/profile">Profile</Link>,
+      key: '0',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      label: <a href="#">Logout</a>,
+      key: '1',
+    },
+  ];
   return(
     <div>
       <Menu theme="dark" mode="horizontal" selectedKeys={[location.pathname]}>
@@ -52,8 +68,19 @@ const HeaderBar = ({
           <Search></Search>
         </Menu.Item>
         <Menu.Item key="user">
+        <Dropdown
+    menu={{
+      items,
+    }}
+    trigger={['click']}
+  >
+    <a onClick={(e) => e.preventDefault()}>
+      <Space>
         <Avatar size="large" style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
-        <Link to="/profile"></Link>
+        <DownOutlined />
+      </Space>
+    </a>
+  </Dropdown>
         </Menu.Item>
       </Space>
       </Menu>

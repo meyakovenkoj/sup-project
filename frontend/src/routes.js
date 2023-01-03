@@ -10,6 +10,7 @@ import Project from './components/Pages/Project/Project'
 import ProjectSearch from './components/Pages/Project/ProjectSearch'
 import TaskSearch from './components/Pages/Task/TaskSearch'
 import PeopleSearch from './components/Pages/People/PeopleSearch'
+import CreateProject from './components/Pages/Project/CreateProject'
 // import RequireAuth from './utils/requireAuth'
 
 export default class WebRoutes extends React.Component {
@@ -58,6 +59,11 @@ export default class WebRoutes extends React.Component {
                   path="/people"
                   history={history}
                   component={PeopleSearch}
+                  />
+                <Route
+                  path="/create_project"
+                  history={history}
+                  component={CreateProject}
                   />
                 <Route path="*" component={NotFound} />
               </Switch>
