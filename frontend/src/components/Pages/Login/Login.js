@@ -13,13 +13,14 @@ const { Header, Content, Footer, Sider } = Layout;
           console.log('Failed:', errorInfo);
         };
     return (
-
+<Layout style={{ height: '100%' }}>
+    <Content style={{ padding: '0 50px', justifyContent: 'center' }}>
 <Space align="center">
 
         <Card
-                style={{
-                    width: 350,
-                }}
+                // style={{
+                //     width: 350,
+                // }}
                 >
     <Form
       name="basic"
@@ -72,6 +73,9 @@ const { Header, Content, Footer, Sider } = Layout;
     </Form>
           </Card>
           </Space>
+
+    </Content>
+    </Layout>
 );
     };
 

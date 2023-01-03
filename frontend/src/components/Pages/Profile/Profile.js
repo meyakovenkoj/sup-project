@@ -13,6 +13,7 @@ import { Typography } from 'antd';
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import { Statistic } from 'antd';
 import { List } from 'antd';
+import People from '../People/People';
 const { Title } = Typography;
 const { TextArea } = Input;
 const { Header, Content, Footer, Sider } = Layout;
@@ -26,44 +27,34 @@ const data = [
   'Los Angeles battles huge wildfires.',
 ];
 
+const mock_tasks = [
+  {title:'Racing car sprays burning fuel into crowd.', index: 'TS-1'},
+  {title:'Japanese princess to wed commoner.', index: 'TS-1'},
+  {title:'Australian walks 100km after outback crash.', index: 'TS-1'},
+  {title:'Man charged over missing wedding girl.', index: 'TS-1'},
+  {title:'Los Angeles battles huge wildfires.', index: 'TS-1'}
+];
+
 
 const Profile = () => {
     return (
         <div>
             <Layout className="site-layout-background">
-            <Content
-        style={{
-          padding: '0 50px',
-        }}
-      >
-        <Row gutter={16}>
-            <Col>
-            <Card
-    hoverable
-    style={{
-      width: 240,
-    }}
-    cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
-  >
-    <Meta title="Europe Street beat" description="www.instagram.com" />
-  </Card>
-            </Col>
-            <Col>
-            <List
-      header={<div>Header</div>}
-      footer={<div>Footer</div>}
+            <Content style={{ padding: '50px' }}>
+
+              <Card>
+
+            <People data={data}></People>
+            <List header={<div>Tasks</div>}
       bordered
-      dataSource={data}
+      dataSource={mock_tasks}
       renderItem={(item) => (
         <List.Item>
-          <Typography.Text mark>[ITEM]</Typography.Text> {item}
+          <Typography.Text mark>{item.index}</Typography.Text> {item.title}
         </List.Item>
-      )}
-    />
-            </Col>
-        </Row>
-        
-  
+      )}></List>
+              </Card>
+            <Content>some controls</Content>
       </Content>
       </Layout>
       </div>

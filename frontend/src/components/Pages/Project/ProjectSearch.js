@@ -9,38 +9,27 @@ const { Meta } = Card;
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const items1 = ['1', '2', '3'].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
-
-const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-  (icon, index) => {
-    const key = String(index + 1);
-
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
-
-      children: new Array(4).fill(null).map((_, j) => {
-        const subKey = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: `option${subKey}`,
-        };
-      }),
-    };
-  },
-);
+const mock_items = [
+    {
+        key: 'proj1',
+        label: 'proj1'
+    },
+    {
+        key: 'proj2',
+        label: 'proj2'
+    },
+    {
+        key: 'proj3',
+        label: 'proj3'
+    },
+    {
+        key: 'proj4',
+        label: 'proj4'
+    },
+];
 
 const ProjectSearch = ({component, element}) => (
   <Layout style={{ height: '100%' }}>
-    {/* <Header className="header">
-      <div className="logo" />
-      <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={[...items1, { label: (<Search></Search>), key: "search" }]}>
-      </Menu>
-    </Header> */}
     <Content style={{ padding: '0 50px' }}>
             <SearchBar></SearchBar>
       <Layout style={{ padding: '24px 0' }}>
@@ -50,13 +39,13 @@ const ProjectSearch = ({component, element}) => (
             defaultSelectedKeys={['1']}
             defaultOpenKeys={['sub1']}
             style={{ height: '100%' }}
-            items={items2}
+            items={mock_items}
           />
         </Sider>
         <Content style={{ padding: '0 24px', minHeight: 280 }}>
           <Card
           >
-<Project></Project>
+            <Project></Project>
           </Card>
         </Content>
       </Layout>

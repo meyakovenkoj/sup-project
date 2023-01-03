@@ -9,6 +9,7 @@ import HeaderBar from './components/Header/HeaderBar'
 import Project from './components/Pages/Project/Project'
 import ProjectSearch from './components/Pages/Project/ProjectSearch'
 import TaskSearch from './components/Pages/Task/TaskSearch'
+import PeopleSearch from './components/Pages/People/PeopleSearch'
 // import RequireAuth from './utils/requireAuth'
 
 export default class WebRoutes extends React.Component {
@@ -52,6 +53,11 @@ export default class WebRoutes extends React.Component {
                   path="/profile"
                   history={history}
                   component={Profile}
+                  />
+                <Route
+                  path="/people"
+                  history={history}
+                  component={PeopleSearch}
                   />
                 <Route path="*" component={NotFound} />
               </Switch>
