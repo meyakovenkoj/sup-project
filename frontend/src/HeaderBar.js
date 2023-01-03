@@ -1,5 +1,6 @@
 import React, { useState }  from 'react';
-import { useLocation } from 'react-router';
+// import { useLocation } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu } from 'antd';
@@ -12,7 +13,7 @@ import { Avatar } from 'antd';
 const { Header, Content, Footer, Sider } = Layout;
 
 const HeaderBar = () => {
-  const location = useLocation();
+  // const location = useLocation();
   // const items1 = [
   //   {
   //     key,
@@ -41,12 +42,12 @@ const HeaderBar = () => {
       {/* <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={[...items1, {label:(<Search></Search>), key:"search"}, {label:(<Button type="primary" onClick={showModal}>Create Task</Button>), key:"create"}, {label:(<Avatar size="large" style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />), key:"user"}]}> */}
       {/* </Menu> */}
       <Menu theme="dark" mode="horizontal">
-        <Menu.Item key="/explore">
+        {/* <Menu.Item key="/explore">
           <Link to="/explore">Explore</Link>
         </Menu.Item>
         <Menu.Item key="/">
           <Link to="/">Dashboard</Link>
-        </Menu.Item>
+        </Menu.Item> */}
       </Menu>
     </Header>
     <Modal title="New Task" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
