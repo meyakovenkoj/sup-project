@@ -1,10 +1,10 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import App from './Main'
-import Login from './Login'
-import Task from './Task'
-import Profile from './Profile'
-import NotFound from './NotFound'
+import Login from './components/Pages/Login/Login'
+import Task from './components/Pages/Task/Task'
+import Profile from './components/Pages/Profile/Profile'
+import NotFound from './components/Pages/NotFound/NotFound'
 // import RequireAuth from './utils/requireAuth'
 
 export default class WebRoutes extends React.Component {

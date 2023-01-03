@@ -1,9 +1,9 @@
 import React from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu } from 'antd';
-import Search from './Search';
+import Search from './components/Header/Search';
 import { Card } from 'antd';
-import Task from './Task';
+import Task from './components/Pages/Task/Task';
 const { Meta } = Card;
 
 const { Header, Content, Footer, Sider } = Layout;
