@@ -36,7 +36,7 @@ const People = ({data}) => {
     style={{
       width: 240,
     }}
-    cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+    cover={<img alt="example" src="https://cs7.pikabu.ru/post_img/big/2019/03/26/11/1553625291161446207.jpg" />}
   >
     <Meta title="Europe Street beat" description="www.instagram.com" />
   </Card>

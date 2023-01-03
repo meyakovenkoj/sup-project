@@ -18,9 +18,6 @@ const { Header, Content, Footer, Sider } = Layout;
 <Space align="center">
 
         <Card
-                // style={{
-                //     width: 350,
-                // }}
                 >
     <Form
       name="basic"
