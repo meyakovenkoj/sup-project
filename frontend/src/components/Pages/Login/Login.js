@@ -1,10 +1,8 @@
 import React from "react";
-import { Button, Card, Space, Form, Input, Layout } from "antd";
+import { Button, Card, Space, Form, Input, Layout, Breadcrumb } from "antd";
 import { connect } from "react-redux";
 import { LoginUser } from "../../../redux/actions/actions";
 const { Header, Content, Footer, Sider } = Layout;
-
-
 
 const Login = (props) => {
   const onFinish = (values) => {
@@ -16,9 +14,7 @@ const Login = (props) => {
   };
   return (
     <Layout style={{ height: "100%" }}>
-      <Content style={{ padding: "0 50px", justifyContent: "center" }}>
-        <Space align="center">
-          <Card>
+      <Content style={{ padding: "5vh 50vh", justifyContent: "center" }}>
             <Form
               name="basic"
               labelCol={{
@@ -68,8 +64,6 @@ const Login = (props) => {
                 </Button>
               </Form.Item>
             </Form>
-          </Card>
-        </Space>
       </Content>
     </Layout>
   );

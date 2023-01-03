@@ -46,11 +46,11 @@ const UploadFile = (props) => {
       <Upload
         action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
         listType="picture-card"
-        fileList={fileList}
+        fileList={props.files}
         onPreview={handlePreview}
         onChange={handleChange}
       >
-        {fileList.length >= 8 ? null : uploadButton}
+        {props.files.length >= 8 ? null : uploadButton}
       </Upload>
       <Modal
         open={previewOpen}

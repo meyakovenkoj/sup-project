@@ -53,6 +53,11 @@ const initialState = {
           ...state,
           tasks: action.tasks,
         };
+        case 'SET_SELECETED_TASK':
+            return {
+              ...state,
+              sel_task: action.sel_task,
+            };
     case 'LOGOUT':
       return {
         ...state,

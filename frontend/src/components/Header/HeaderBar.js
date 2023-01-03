@@ -5,7 +5,7 @@ import { Modal, Menu, Button, Space, Typography, Avatar, Dropdown, Input } from 
 import { UserOutlined, DownOutlined } from "@ant-design/icons";
 import TaskModal from "../Pages/Task/TaskModal";
 import { connect } from "react-redux";
-import { Logout, searchTask } from "../../redux/actions/actions";
+import { getTasks, Logout, searchTask } from "../../redux/actions/actions";
 const { Search } = Input;
 
 const { Title } = Typography;
@@ -25,7 +25,11 @@ const HeaderBar = ({ location, Logout, searchTask}) => {
     Logout();
   }
   const onSearch = (value) => {
-    searchTask(value);
+    if(value === '') {
+      getTasks();
+    } else {
+      searchTask(value);
+    }
   };
   const items = [
     {
@@ -68,7 +72,7 @@ const HeaderBar = ({ location, Logout, searchTask}) => {
             </Button>
           </Menu.Item>
           <Menu.Item key="search">
-            <Search onSearch={onSearch}></Search>
+            <Search onSearch={onSearch} enterButton={<Link to="/">Search</Link>}></Search>
           </Menu.Item>
           <Menu.Item key="user">
             <Dropdown
@@ -112,7 +116,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   Logout: () => dispatch(Logout()),
-  searchTask: (title) => dispatch(searchTask(title))
+  searchTask: (title) => dispatch(searchTask(title)),
+  getTasks: () => dispatch(getTasks())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(HeaderBar));

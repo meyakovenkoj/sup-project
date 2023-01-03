@@ -46,7 +46,7 @@ const Registration = (props) => {
 
   return (
     <Layout style={{ height: "100%" }}>
-      <Content style={{ padding: "50px", justifyContent: "center" }}>
+      <Content style={{ padding: "0 50vh", justifyContent: "center" }}>
       <Title level={2}>Registation</Title>
 
         {/* <Space align="center"> */}

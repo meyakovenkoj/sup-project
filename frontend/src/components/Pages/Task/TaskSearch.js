@@ -4,20 +4,19 @@ import { Card } from "antd";
 import Task from "./Task";
 import SearchBar from "../../Header/SearchBar";
 import { connect } from "react-redux";
-import { getTasks, searchTask } from "../../../redux/actions/actions";
+import { getTask, getTasks, searchTask } from "../../../redux/actions/actions";
 
 const { Header, Content, Footer, Sider } = Layout;
 
 
 
-const TaskSearch = ({ component, element, getTasks, tasks , searchTask}) => {
+const TaskSearch = ({ component, element, getTasks, getTask, tasks , searchTask, selectedTask}) => {
   useLayoutEffect(() => {
     getTasks();
   }, []);
-  const [selectedTask, setSelectedTask] = useState({});
 
   const handleSelect = (info) => {
-    setSelectedTask(info.item.props);
+    getTask(info.item.props._id);
   }
 
   const searchFunc = (data) => {
@@ -45,7 +44,7 @@ const TaskSearch = ({ component, element, getTasks, tasks , searchTask}) => {
         </Sider>
         <Content style={{ padding: "0 24px", minHeight: 280 }}>
           <Card>
-            <Task data={selectedTask}></Task>
+            <Task></Task>
           </Card>
         </Content>
       </Layout>
@@ -60,12 +59,14 @@ const TaskSearch = ({ component, element, getTasks, tasks , searchTask}) => {
 const mapStateToProps = (state) => {
   return {
     loading: state.authUser.loading,
-    tasks: state.authUser.tasks
+    tasks: state.authUser.tasks,
+    selectedTask: state.authUser.sel_task
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
   getTasks: () => dispatch(getTasks()),
+  getTask: (task_id) => dispatch(getTask(task_id)),
   searchTask: (title) => dispatch(searchTask(title))
 })
 

@@ -30,7 +30,7 @@ const Comment = ({data, edit, deleteComment}) => {
     {data.map(comment => (
       <Card
       type="inner"
-      title="User 1"
+      title={comment.author}
       extra={
         <div>
           <Button type="primary" onClick={() => {edit(comment)}}>
@@ -40,7 +40,7 @@ const Comment = ({data, edit, deleteComment}) => {
         </div>
       }
     >
-      <p>{comment}</p>
+      <p>{comment.text}</p>
     </Card>
     ))}
   </div> : <></>);
@@ -103,9 +103,9 @@ const Task = (props) => {
 
   const processFiles = () => {
     var files = [];
-    if (props.data.files) {
+    if (props.selectedTask.files) {
 
-        props.data.files.forEach(item => {
+        props.selectedTask.files.forEach(item => {
         var title = item.split('/');
         var elem = {
             name: title[0],
@@ -137,10 +137,10 @@ const Task = (props) => {
   };
 
   const onFinish = (values) => {
-    props.addComment(props.data._id, values.text)
+    props.addComment(props.selectedTask.id, values.text)
   };
 
-  return (
+  return (props.selectedTask ? 
     <div>
       <Content
         style={{
@@ -157,7 +157,7 @@ const Task = (props) => {
           <Breadcrumb.Item>App</Breadcrumb.Item>
         </Breadcrumb>
 
-        <Title level={2}>{props.data.title}</Title>
+        <Title level={2}>{props.selectedTask.title}</Title>
         <Row gutter={14}>
           <Col className="gutter-row" span={6}>
             <Button type="primary" onClick={showModal}>
@@ -180,14 +180,14 @@ const Task = (props) => {
 
         <Row gutter={22}>
           <Col className="gutter-row" span={16}>
-            <Card title="Card title НАСТЯ" bordered={false} style={{}}>
-              <p>{props.data.description}</p>
+            <Card title="Description" bordered={false} style={{}}>
+              <p>{props.selectedTask.description}</p>
             </Card>
             <Card>
               <UploadFile files={processFiles()}></UploadFile>
             </Card>
             <Card>
-                <Comment data={props.data.comments} edit={editShowModal} deleteComment={(id) => {showDeleteConfirm(id)}}></Comment>
+                <Comment data={props.selectedTask.comments} edit={editShowModal} deleteComment={(id) => {showDeleteConfirm(id)}}></Comment>
               {/*  */}
               <br></br>
               <Form
@@ -231,9 +231,11 @@ const Task = (props) => {
           </Col>
           <Col className="gutter-row" span={8}>
             <Card title="Card title" bordered={false} style={{}}>
-              <p>Author: {props.data.author}</p>
-              <p>Checker: {props.data.checker}</p>
-              <p>Date: {props.data.changed}</p>
+              <p>Author: {props.selectedTask.author}</p>
+              <p>Checker: {props.selectedTask.checker}</p>
+              <p>Date: {props.selectedTask.changed}</p>
+              <p>Status: {props.selectedTask.status}</p>
+              <p>Type: {props.selectedTask.task_type}</p>
             </Card>
 
             <Row>
@@ -278,7 +280,7 @@ const Task = (props) => {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <Solve></Solve>
+        <Solve task_id={props.selectedTask.id}></Solve>
       </Modal>
       <Modal
         title="Are you sure to delete?"
@@ -287,6 +289,7 @@ const Task = (props) => {
         onCancel={handleCancelDelete}
       ></Modal>
       <Modal
+      destroyOnClose
         title="Edit"
         open={isEditModalOpen}
         onOk={handleOkEdit}
@@ -300,15 +303,16 @@ const Task = (props) => {
         onOk={handleOkEditTask}
         onCancel={handleCancelEditTask}
       >
-        <EditTask></EditTask>
+        <EditTask task_id={props.selectedTask.id}></EditTask>
       </Modal>
-    </div>
+    </div> : <></>
   );
 };
 
 const mapStateToProps = (state) => {
     return {
-      loading: state.authUser.loading
+      loading: state.authUser.loading,
+      selectedTask: state.authUser.sel_task
     }
   }
   

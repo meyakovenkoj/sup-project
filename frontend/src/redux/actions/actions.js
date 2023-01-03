@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const url = 'https://v1517237.hosted-by-vdsina.ru';
-const url = 'http://localhost:8080';
+const url = 'https://v1517237.hosted-by-vdsina.ru';
+// const url = 'http://localhost:8080';
 
 export function RegisterUser(userData) {
     return (dispatch) => {
@@ -136,7 +136,7 @@ export function Logout() {
           const usrs = res.data.data.users;
           var users = [];
             usrs.forEach(item => {
-            var elem = {...item, key:item.id, label:item.username};
+            var elem = {...item, key:item._id, value:item._id, label:item.username};
             users.push(elem);
             });
           dispatch({type: 'SET_USERS', users});
@@ -156,7 +156,7 @@ export function getProjects() {
           const projs = res.data.data.projects;
           var projects = [];
           projs.forEach(item => {
-          var elem = {...item, key:item.id, label:item.title};
+          var elem = {...item, key:item._id, label:item.title, value:item._id};
           projects.push(elem);
           });
           dispatch({ type: 'SET_PROJECTS', projects })
@@ -248,6 +248,24 @@ export function getProjects() {
     };
   }
 
+  export function changeStatusTask(status, task_id) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/tasks/'+task_id+'/status/'+status,
+        {
+        },
+        {withCredentials: true}
+      )
+        .then((res) => {
+            alert(res);
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
 
   export function createProject(title) {
     return (dispatch) => {
@@ -290,11 +308,74 @@ export function getProjects() {
     };
   }
 
+  export function getTask(task_id) {
+    return (dispatch) => {
+      axios
+      .get(
+        url+'/_xhr/tasks/'+task_id,
+        { withCredentials: true}
+      )
+        .then((res) => {
+            const sel_task = res.data.data.task;
+            dispatch({ type: 'SET_SELECETED_TASK', sel_task })
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
   export function getTasks() {
     return (dispatch) => {
       axios
       .get(
         url+'/tasks',
+        {withCredentials: true}
+      )
+        .then((res) => {
+            const tsks = res.data.data.tasks;
+            var tasks = [];
+            tsks.forEach(item => {
+            var elem = {...item, key:item.id, label:item.title};
+            tasks.push(elem);
+            });
+            dispatch({ type: 'SET_TASKS', tasks })
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function setTaskExecutor(task_id, pp_id) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/tasks/' + task_id + '/status/set_tester',
+        {pp_id:pp_id},
+        {withCredentials: true}
+      )
+        .then((res) => {
+            const tsks = res.data.data.tasks;
+            var tasks = [];
+            tsks.forEach(item => {
+            var elem = {...item, key:item.id, label:item.title};
+            tasks.push(elem);
+            });
+            dispatch({ type: 'SET_TASKS', tasks })
+        })
+        .catch((err) => {
+          alert(err);
+        });
+    };
+  }
+
+  export function setTaskTester(task_id, pp_id) {
+    return (dispatch) => {
+      axios
+      .post(
+        url+'/_xhr/tasks/' + task_id + '/status/set_tester',
+        {pp_id:pp_id},
         {withCredentials: true}
       )
         .then((res) => {

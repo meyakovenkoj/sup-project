@@ -1,5 +1,7 @@
 import React from "react";
-import { Select, Divider, Input, Typography } from "antd";
+import { Select, Divider, Input, Typography, Form, Button } from "antd";
+import { addComment, changeStatusTask, getUsers } from "../../../redux/actions/actions";
+import { connect } from "react-redux";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -11,44 +13,38 @@ const onSearch = (value) => {
   console.log("search:", value);
 };
 
-const Solve = () => (
+
+const Solve = (props) => {
+  const onFinish = (values) => {
+    props.addComment(props.task_id, values.comment )
+    props.changeStatusTask(values.status, props.task_id)
+    console.log("Success:", values);
+  };
+  return (
   <>
-    <Title level={5}>Comment</Title>
+  <Form
+              name="basic"
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              onFinish={onFinish}
+              autoComplete="off"
+            >
+              <Form.Item
+                label="Comment"
+                name="comment"
+              >
+                <Input />
+              </Form.Item>
 
-    <TextArea rows={4} placeholder="maxLength is 6" maxLength={6} />
-    <Title level={5}>Testing Plan</Title>
-
-    <TextArea rows={4} placeholder="maxLength is 6" maxLength={6} />
-    <Title level={5}>Tester</Title>
-
-    <Select
-      showSearch
-      placeholder="Select a person"
-      optionFilterProp="children"
-      onChange={onChange}
-      onSearch={onSearch}
-      filterOption={(input, option) =>
-        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-      }
-      options={[
-        {
-          value: "jack",
-          label: "Jack",
-        },
-        {
-          value: "lucy",
-          label: "Lucy",
-        },
-        {
-          value: "tom",
-          label: "Tom",
-        },
-      ]}
-    />
-
-    <Title level={5}>Status</Title>
-
-    <Select
+              <Form.Item
+                label="Status"
+                name="status"
+              >
+                    <Select
       showSearch
       placeholder="Select status"
       optionFilterProp="children"
@@ -59,20 +55,58 @@ const Solve = () => (
       }
       options={[
         {
-          value: "solve",
-          label: "Solve",
+          value: "reopen",
+          label: "Reopen",
         },
         {
-          value: "wontfixed",
-          label: "Won't Fixed",
+          value: "verify",
+          label: "Ready",
         },
         {
-          value: "closed",
-          label: "Closed",
+          value: "request_correction",
+          label: "Verification",
+        },
+        {
+          value: "finish",
+          label: "Finish",
+        },
+        {
+          value: "close",
+          label: "Close",
         },
       ]}
     />
+              </Form.Item>
+              <Form.Item
+                wrapperCol={{
+                  offset: 8,
+                  span: 16,
+                }}
+              >
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+
+
     <Divider></Divider>
   </>
 );
-export default Solve;
+    };
+
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading,
+    users: state.authUser.users,
+
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  addComment: (task_id, text) => dispatch(addComment(task_id, text)),
+  getUsers: () => dispatch(getUsers()),
+  changeStatusTask: (task_status, task_id ) => dispatch(changeStatusTask(task_status, task_id ))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Solve);

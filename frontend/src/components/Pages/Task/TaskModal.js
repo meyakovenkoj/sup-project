@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from "react";
-import { Typography } from "antd";
+import { Form, Typography, Button } from "antd";
 import { Input } from "antd";
 import { Col, Divider, Row } from "antd";
 import { Select } from "antd";
@@ -20,11 +20,11 @@ const onSearch = (value) => {
 
 const TaskModal = (props) => {
   useLayoutEffect(() => {
-    props.getUsers();
     props.getProjects();
   }, []);
 
   const [project_id, setProjectID] = useState('');
+  const [projectName, setProjectName] = useState('');
   const [title, setTaskTitle] = useState('');
   const [description, setTaskDescription] = useState('');
   const [type, setTaskType] = useState('');
@@ -32,56 +32,76 @@ const TaskModal = (props) => {
   const handleTitle = (value) => {
     setTaskTitle(value);
   }
+  const onFinish = (values) => {
+    props.createTask(values.title, values.description, values.type, values.project.value)
+    console.log("Success:", values);
+  };
+
+  const handleProject = (value) => {
+    setProjectID(value._id);
+    setProjectName(value.title);
+  }
 
   return (
   <>
-    <Title level={5}>Title</Title>
-
-    <Input placeholder="Basic usage" onChange={handleTitle} />
-    <Title level={5}>Task</Title>
-
-    <TextArea rows={6} placeholder="maxLength is 256" maxLength={256} onChange={(value) => {setTaskDescription(value)}}/>
-
     <Row>
       <Col>
-        <Title level={5}>Project</Title>
+      <Form
+              name="basic"
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              onFinish={onFinish}
+              autoComplete="off"
+            >
+              <Form.Item
+                label="Title"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input title!",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
 
-        <Select
-          showSearch
-          placeholder="Select status"
+              <Form.Item
+                label="Description"
+                name="description"
+              >
+                <TextArea />
+              </Form.Item>
+
+              <Form.Item
+                label="Project"
+                name="project"
+              >
+                <Select
+          labelInValue
+          placeholder="Select project"
           optionFilterProp="children"
-          onChange={(value) => {setProjectID(value._id)}}
-          onSearch={onSearch}
+          onSelect={handleProject}
           filterOption={(input, option) =>
             (option?.title ?? "").toLowerCase().includes(input.toLowerCase())
           }
           options={props.projects}
+          value={projectName}
         />
-      </Col>
-      <Col>
-        <Title level={5}>Worker</Title>
+              </Form.Item>
 
-        <Select
+              <Form.Item
+                label="Type"
+                name="type"
+              >
+                <Select
           showSearch
-          placeholder="Select status"
+          placeholder="Select type"
           optionFilterProp="children"
-          onChange={onChange}
-          onSearch={onSearch}
-          filterOption={(input, option) =>
-            (option?.username ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={props.users}
-        />
-      </Col>
-      <Col>
-        <Title level={5}>Type</Title>
-
-        <Select
-          showSearch
-          placeholder="Select status"
-          optionFilterProp="children"
-          onChange={(value) => {setTaskType(value)}}
-          onSearch={onSearch}
           filterOption={(input, option) =>
             (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
           }
@@ -91,15 +111,33 @@ const TaskModal = (props) => {
               label: "Bug",
             },
             {
-              value: "error",
-              label: "Error",
+              value: "task",
+              label: "Task",
             },
             {
-              value: "note",
-              label: "Note",
+              value: "feature",
+              label: "Feature",
+            },
+            {
+              value: "story",
+              label: "Story",
             },
           ]}
         />
+              </Form.Item>
+
+              <Form.Item
+                wrapperCol={{
+                  offset: 8,
+                  span: 16,
+                }}
+              >
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+   
       </Col>
     </Row>
 

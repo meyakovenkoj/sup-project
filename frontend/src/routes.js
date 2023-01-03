@@ -12,6 +12,7 @@ import PeopleSearch from "./components/Pages/People/PeopleSearch";
 import CreateProject from "./components/Pages/Project/CreateProject";
 import Registration from "./components/Pages/Login/Registation";
 import AdminPanel from "./components/Pages/Admin/AdminPanel";
+import RequireAuth from "./requireAuth";
 
 export default class WebRoutes extends React.Component {
   render() {
@@ -22,33 +23,33 @@ export default class WebRoutes extends React.Component {
           <div>
             <HeaderBar history={history} />
             <Switch>
-              <Route exact path="/" history={history} component={TaskSearch} />
+              <Route exact path="/" history={history} component={RequireAuth(TaskSearch)} />
               <Route
                 exact
                 path="/projects"
                 history={history}
-                component={ProjectSearch}
+                component={RequireAuth(ProjectSearch)}
               />
               <Route exact path="/login" history={history} component={Login} />
-              <Route path="/task" history={history} component={Task} />
-              <Route path="/project" history={history} component={Project} />
-              <Route path="/profile" history={history} component={Profile} />
+              <Route path="/task" history={history} component={RequireAuth(Task)} />
+              <Route path="/project" history={history} component={RequireAuth(Project)} />
+              <Route path="/profile" history={history} component={RequireAuth(Profile)} />
               <Route
                 path="/people"
                 history={history}
-                component={PeopleSearch}
+                component={RequireAuth(PeopleSearch)}
               />
               <Route
                 path="/create_project"
                 history={history}
-                component={CreateProject}
+                component={RequireAuth(CreateProject)}
               />
               <Route
                 path="/register"
                 history={history}
-                component={Registration}
+                component={RequireAuth(Registration)}
               />
-              <Route path="/admin" history={history} component={AdminPanel} />
+              <Route path="/admin" history={history} component={RequireAuth(AdminPanel)} />
 
               <Route path="*" component={NotFound} />
             </Switch>
