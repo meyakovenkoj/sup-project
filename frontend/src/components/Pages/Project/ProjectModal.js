@@ -3,9 +3,6 @@ import { Typography } from "antd";
 import { Input } from "antd";
 import { Col, Divider, Row } from "antd";
 import { Select } from "antd";
-import UploadFile from "../../utils/UploadFile";
-import { createTask } from "../../../redux/actions/actions";
-import { connect } from "react-redux";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -17,15 +14,7 @@ const onSearch = (value) => {
   console.log("search:", value);
 };
 
-
-const TaskModal = (props) => {
-  const state = {
-    title: '',
-    description: '',
-    type: '',
-    project_id: '',
-  }
-  return (
+const ProjectModal = () => (
   <>
     <Title level={5}>Title</Title>
 
@@ -33,7 +22,6 @@ const TaskModal = (props) => {
     <Title level={5}>Task</Title>
 
     <TextArea rows={6} placeholder="maxLength is 6" maxLength={6} />
-
     <Row>
       <Col>
         <Title level={5}>Project</Title>
@@ -124,16 +112,4 @@ const TaskModal = (props) => {
     <Divider></Divider>
   </>
 );
-};
-
-const mapStateToProps = (state) => {
-  return {
-    loading: state.authUser.loading
-  }
-}
-
-const mapDispatchToProps = (dispatch) => ({
-  createTask: (title, description, type, project_id) => dispatch(createTask(title, description, type, project_id))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TaskModal);
+export default ProjectModal;

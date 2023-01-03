@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { Layout, Card, Typography, List } from "antd";
 import People from "./People";
+import { connect } from "react-redux";
+import { GetMe, getTasks } from "../../../redux/actions/actions";
 const { Header, Content, Footer, Sider } = Layout;
 
 const data = [
@@ -19,17 +21,21 @@ const mock_tasks = [
   { title: "Los Angeles battles huge wildfires.", index: "TS-1" },
 ];
 
-const Profile = () => {
+const Profile = ({user, GetMe, getTasks, tasks}) => {
+  useLayoutEffect(() => {
+    GetMe();
+    getTasks();
+  }, []);
   return (
     <div>
       <Layout className="site-layout-background">
         <Content style={{ padding: "50px" }}>
           <Card>
-            <People data={data}></People>
+            <People data={user}></People>
             <List
               header={<div>Tasks</div>}
               bordered
-              dataSource={mock_tasks}
+              dataSource={tasks}
               renderItem={(item) => (
                 <List.Item>
                   <Typography.Text mark>{item.index}</Typography.Text>{" "}
@@ -38,11 +44,24 @@ const Profile = () => {
               )}
             ></List>
           </Card>
-          <Content>some controls</Content>
         </Content>
       </Layout>
     </div>
   );
 };
 
-export default Profile;
+const mapStateToProps = (state) => {
+  return {
+    user: state.authUser.user,
+    tasks: state.authUser.tasks
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  GetMe: () => dispatch(GetMe()),
+  getTasks: () => dispatch(getTasks())
+
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);
+

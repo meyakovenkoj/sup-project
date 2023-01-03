@@ -1,6 +1,9 @@
 import React from "react";
-import { Button, Form, Input, Card, Space } from "antd";
+import { Button, Form, Input, Card, Space, Typography } from "antd";
 import { Layout } from "antd";
+import { connect } from "react-redux";
+import { RegisterUser } from "../../../redux/actions/actions";
+const { Title } = Typography;
 const { Meta } = Card;
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -34,17 +37,20 @@ const tailFormItemLayout = {
     },
   },
 };
-const Registration = () => {
+const Registration = (props) => {
   const [form] = Form.useForm();
   const onFinish = (values) => {
+    props.RegisterUser({ user: { ...values } })
     console.log("Received values of form: ", values);
   };
 
   return (
     <Layout style={{ height: "100%" }}>
       <Content style={{ padding: "50px", justifyContent: "center" }}>
-        <Space align="center">
-          <Card>
+      <Title level={2}>Registation</Title>
+
+        {/* <Space align="center"> */}
+          {/* <Card> */}
             <Form
               {...formItemLayout}
               form={form}
@@ -143,10 +149,22 @@ const Registration = () => {
                 </Button>
               </Form.Item>
             </Form>
-          </Card>
-        </Space>
+          {/* </Card> */}
+        {/* </Space> */}
       </Content>
     </Layout>
   );
 };
-export default Registration;
+
+const mapStateToProps = (state) => {
+    return {
+      loading: state.authUser.loading
+    }
+  }
+  
+  const mapDispatchToProps = (dispatch) => ({
+    RegisterUser: (userInfo) => dispatch(RegisterUser(userInfo))
+  })
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Registration);
+  

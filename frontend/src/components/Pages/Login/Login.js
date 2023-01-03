@@ -1,9 +1,14 @@
 import React from "react";
 import { Button, Card, Space, Form, Input, Layout } from "antd";
+import { connect } from "react-redux";
+import { LoginUser } from "../../../redux/actions/actions";
 const { Header, Content, Footer, Sider } = Layout;
 
-const Login = () => {
+
+
+const Login = (props) => {
   const onFinish = (values) => {
+    props.LoginUser({ user: { ...values } })
     console.log("Success:", values);
   };
   const onFinishFailed = (errorInfo) => {
@@ -70,4 +75,14 @@ const Login = () => {
   );
 };
 
-export default Login;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  LoginUser: (userInfo) => dispatch(LoginUser(userInfo))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

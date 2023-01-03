@@ -1,33 +1,31 @@
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Layout, Menu, Card } from "antd";
 import Project from "./Project";
 import SearchBar from "../../Header/SearchBar";
+import { getProjects } from "../../../redux/actions/actions";
+import { connect } from "react-redux";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const mock_items = [
-  {
-    key: "proj1",
-    label: "proj1",
-  },
-  {
-    key: "proj2",
-    label: "proj2",
-  },
-  {
-    key: "proj3",
-    label: "proj3",
-  },
-  {
-    key: "proj4",
-    label: "proj4",
-  },
-];
 
-const ProjectSearch = ({ component, element }) => (
+
+const ProjectSearch = ({ component, element, projects, getProjects }) => {
+  useLayoutEffect(() => {
+    getProjects();
+  }, []);
+  const [selectedProject, setSelectedProject] = useState({});
+
+  const handleSelect = (info) => {
+    setSelectedProject(info.item.props);
+  }
+
+  const searchFunc = (data) => {
+    getProjects();
+  }
+  return (
   <Layout style={{ height: "100%" }}>
     <Content style={{ padding: "0 50px" }}>
-      <SearchBar></SearchBar>
+      <SearchBar searchFunc={searchFunc}></SearchBar>
       <Layout style={{ padding: "24px 0" }}>
         <Sider className="site-layout-background" width={200}>
           <Menu
@@ -35,12 +33,13 @@ const ProjectSearch = ({ component, element }) => (
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%" }}
-            items={mock_items}
+            items={projects}
+            onSelect={handleSelect}
           />
         </Sider>
         <Content style={{ padding: "0 24px", minHeight: 280 }}>
           <Card>
-            <Project></Project>
+            <Project  data={selectedProject}></Project>
           </Card>
         </Content>
       </Layout>
@@ -50,5 +49,19 @@ const ProjectSearch = ({ component, element }) => (
     </Footer>
   </Layout>
 );
+  };
 
-export default ProjectSearch;
+
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading,
+    users: state.authUser.users
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  getProjects: () => dispatch(getProjects()),
+  // searchProject: (title) => dispatch(searchProject(title))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProjectSearch);

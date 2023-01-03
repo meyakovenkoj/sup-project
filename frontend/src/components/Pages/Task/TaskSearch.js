@@ -1,34 +1,32 @@
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Layout, Menu } from "antd";
 import { Card } from "antd";
 import Task from "./Task";
 import SearchBar from "../../Header/SearchBar";
+import { connect } from "react-redux";
+import { getTasks } from "../../../redux/actions/actions";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const mock_items = [
-  {
-    key: "task1",
-    label: "task1",
-  },
-  {
-    key: "task2",
-    label: "task2",
-  },
-  {
-    key: "task3",
-    label: "task3",
-  },
-  {
-    key: "task4",
-    label: "task4",
-  },
-];
 
-const TaskSearch = ({ component, element }) => (
-  <Layout style={{ height: "100%" }}>
+
+const TaskSearch = ({ component, element, getTasks, tasks }) => {
+  useLayoutEffect(() => {
+    getTasks();
+  }, []);
+  const [selectedTask, setSelectedTask] = useState({});
+
+  const handleSelect = (info) => {
+    setSelectedTask(info.item.props);
+  }
+
+  const searchFunc = (data) => {
+    getTasks();
+  }
+  return (
+    <Layout style={{ height: "100%" }}>
     <Content style={{ padding: "0 50px" }}>
-      <SearchBar></SearchBar>
+      <SearchBar searchFunc={searchFunc}></SearchBar>
 
       <Layout style={{ padding: "24px 0" }}>
         <Sider className="site-layout-background" width={200}>
@@ -37,12 +35,13 @@ const TaskSearch = ({ component, element }) => (
             defaultSelectedKeys={["1"]}
             defaultOpenKeys={["sub1"]}
             style={{ height: "100%" }}
-            items={mock_items}
+            items={tasks}
+            onSelect={handleSelect}
           />
         </Sider>
         <Content style={{ padding: "0 24px", minHeight: 280 }}>
           <Card>
-            <Task></Task>
+            <Task data={selectedTask}></Task>
           </Card>
         </Content>
       </Layout>
@@ -52,5 +51,17 @@ const TaskSearch = ({ component, element }) => (
     </Footer>
   </Layout>
 );
+  };
 
-export default TaskSearch;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading,
+    tasks: state.authUser.tasks
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  getTasks: () => dispatch(getTasks()),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(TaskSearch);

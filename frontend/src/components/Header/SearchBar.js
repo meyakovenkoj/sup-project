@@ -1,11 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Layout, Button, Card, Col, Row } from "antd";
-import Search from "./Search";
+import { Layout, Button, Card, Col, Row, Input } from "antd";
+const { Search } = Input;
+
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const SearchBar = () => {
+const SearchBar = ({searchFunc}) => {
+    const onSearch = (value) => {
+        searchFunc(value);
+      };
   return (
     <Content
       style={{
@@ -18,7 +22,15 @@ const SearchBar = () => {
             <Button type="primary">Close</Button>
           </Col>
           <Col className="gutter-row" span={6}>
-            <Search></Search>
+          <Search
+      placeholder="input search text"
+      allowClear
+      onSearch={onSearch}
+      style={{
+        width: 200,
+      }}
+    />
+            {/* <MySearch searchFunc={searchFunc}></MySearch> */}
           </Col>
           <Col className="gutter-row" span={6}>
             <Button>Primary Button</Button>

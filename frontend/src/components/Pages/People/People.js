@@ -1,10 +1,12 @@
 import React from "react";
 import { Col, List, Row, Layout, Card, Input, Typography } from "antd";
+import { connect } from "react-redux";
 
 const { Meta } = Card;
 const { Header, Content, Footer, Sider } = Layout;
 
 const People = ({ data }) => {
+
   return (
     <div>
       <Content
@@ -27,23 +29,23 @@ const People = ({ data }) => {
               }
             >
               <Meta
-                title="Europe Street beat"
-                description="www.instagram.com"
+                title={<div>{data.name} {data.surname}</div>}
               />
             </Card>
           </Col>
           <Col>
-            <List
-              header={<div>Header</div>}
-              footer={<div>Footer</div>}
+                  <Typography.Text mark>[ITEM]</Typography.Text> {data.username}
+                  <List
+              header={<div>Projects</div>}
               bordered
-              dataSource={data}
+              dataSource={data.projects}
               renderItem={(item) => (
                 <List.Item>
                   <Typography.Text mark>[ITEM]</Typography.Text> {item}
                 </List.Item>
               )}
             />
+
           </Col>
         </Row>
       </Content>
@@ -51,4 +53,13 @@ const People = ({ data }) => {
   );
 };
 
-export default People;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(People);

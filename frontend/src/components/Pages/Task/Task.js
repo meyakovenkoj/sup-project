@@ -14,6 +14,7 @@ import { ExclamationCircleFilled } from "@ant-design/icons";
 import { Statistic } from "antd";
 import EditComment from "./EditComment";
 import EditTask from "./EditTask";
+import { connect } from "react-redux";
 const { Title } = Typography;
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -36,17 +37,8 @@ const showDeleteConfirm = () => {
 };
 
 const { Meta } = Card;
-// const style = {
-//     background: '#0092ff',
-//     padding: '8px 0',
-// };
 
 const { Header, Content, Footer, Sider } = Layout;
-
-const items1 = ["1", "2", "3"].map((key) => ({
-  key,
-  label: `nav ${key}`,
-}));
 
 const Task = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,7 +87,6 @@ const Task = () => {
 
   return (
     <div>
-      {/* <Layout> */}
       <Content
         style={{
           padding: "0 50px",
@@ -115,7 +106,7 @@ const Task = () => {
         <Row gutter={14}>
           <Col className="gutter-row" span={6}>
             <Button type="primary" onClick={showModal}>
-              Close
+              Solve
             </Button>
           </Col>
           <Col className="gutter-row" span={6}></Col>
@@ -123,25 +114,17 @@ const Task = () => {
             <Button onClick={editTaskShowModal}>Edit</Button>
           </Col>
           <Col className="gutter-row" span={6}>
-            <Button type="primary">Primary Button</Button>
+            <Button type="primary">Subscribe</Button>
           </Col>
         </Row>
-        <Row gutter={16}>
+        <Row gutter={14}>
           <Col className="gutter-row" span={6}>
-            <Button>Primary Button</Button>
-            <Button>Primary Button</Button>
-          </Col>
-          <Col className="gutter-row" span={6}></Col>
-          <Col className="gutter-row" span={6}>
-            <Button>Primary Button</Button>
-          </Col>
-          <Col className="gutter-row" span={6}>
-            <Button>Primary Button</Button>
+            <Button disabled>Move to test</Button>
           </Col>
         </Row>
 
-        <Row gutter={16}>
-          <Col className="gutter-row" span={18}>
+        <Row gutter={22}>
+          <Col className="gutter-row" span={16}>
             <Card title="Card title НАСТЯ" bordered={false} style={{}}>
               <p>Card content</p>
               <p>Card content</p>
@@ -170,7 +153,7 @@ const Task = () => {
               <Button type="primary">Send</Button>
             </Card>
           </Col>
-          <Col className="gutter-row" span={4}>
+          <Col className="gutter-row" span={8}>
             <Card title="Card title" bordered={false} style={{}}>
               <p>Card content</p>
               <p>Card content</p>
@@ -212,9 +195,9 @@ const Task = () => {
         <br />
         <br />
       </Content>
-      {/* </Layout> */}
+
       <Modal
-        title="Close"
+        title="Solve"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -247,4 +230,13 @@ const Task = () => {
   );
 };
 
-export default Task;
+const mapStateToProps = (state) => {
+    return {
+      loading: state.authUser.loading
+    }
+  }
+  
+  const mapDispatchToProps = (dispatch) => ({
+  })
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Task);

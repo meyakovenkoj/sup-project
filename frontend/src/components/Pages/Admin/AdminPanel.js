@@ -7,9 +7,9 @@ const { Header, Content, Footer, Sider } = Layout;
 const AdminPanel = () => (
   <Layout className="site-layout-background">
     <Content style={{ padding: "50px" }}>
-      <Card>
+      {/* <Card> */}
         <Space
-          direction="vertical"
+          direction="horizontal"
           style={{
             width: "100%",
           }}
@@ -21,7 +21,7 @@ const AdminPanel = () => (
             <Button type="primary">Add Project</Button>
           </Link>
         </Space>
-      </Card>
+      {/* </Card> */}
     </Content>
   </Layout>
 );

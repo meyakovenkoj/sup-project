@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
 import { Modal, Menu, Button, Space, Typography, Avatar, Dropdown } from "antd";
 import { UserOutlined, DownOutlined } from "@ant-design/icons";
-import Search from "./Search";
+import Search from "./MySearch";
 import TaskModal from "../Pages/Task/TaskModal";
+import { connect } from "react-redux";
+import { Logout } from "../../redux/actions/actions";
 
 const { Title } = Typography;
 
-const HeaderBar = ({ location }) => {
+const HeaderBar = ({ location, Logout }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
@@ -19,6 +21,9 @@ const HeaderBar = ({ location }) => {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  const handleLogout = () => {
+    Logout();
+  }
   const items = [
     {
       label: <Link to="/profile">Profile</Link>,
@@ -28,7 +33,7 @@ const HeaderBar = ({ location }) => {
       type: "divider",
     },
     {
-      label: <a href="#">Logout</a>,
+      label: <Link to="/login" onClick={handleLogout}>Logout</Link>,
       key: "1",
     },
   ];
@@ -95,4 +100,15 @@ const HeaderBar = ({ location }) => {
   );
 };
 
-export default withRouter(HeaderBar);
+
+const mapStateToProps = (state) => {
+  return {
+    loading: state.authUser.loading
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  Logout: () => dispatch(Logout())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(HeaderBar));
