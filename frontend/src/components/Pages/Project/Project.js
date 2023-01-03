@@ -1,30 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {useParams} from "react-router-dom"
 import { Button, Layout, List, Modal, Typography } from "antd";
 import ProjectModal from "./ProjectModal";
 import { connect } from "react-redux";
-import { getUsers } from "../../../redux/actions/actions";
+import { getUsers, getProject, changeStatus } from "../../../redux/actions/actions";
 
 const { Title } = Typography;
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const mock_users = [
-  { title: "Max Ivanov", role: "dev" },
-  { title: "Mihail Ro", role: "dev" },
-  { title: "Anila Po", role: "dev" },
-  { title: "Nono No", role: "dev" },
-  { title: "Ayya T1", role: "dev" },
-];
-
-const mock_tasks = [
-  { title: "Racing car sprays burning fuel into crowd.", index: "TS-1" },
-  { title: "Japanese princess to wed commoner.", index: "TS-1" },
-  { title: "Australian walks 100km after outback crash.", index: "TS-1" },
-  { title: "Man charged over missing wedding girl.", index: "TS-1" },
-  { title: "Los Angeles battles huge wildfires.", index: "TS-1" },
-];
 
 const Project = (props) => {
+  const {projectId} = useParams();
+  useEffect(() => {
+    props.getProject(projectId);
+  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
@@ -46,6 +36,22 @@ const Project = (props) => {
   const handleAddCancel = () => {
     setIsModalAddOpen(false);
   };
+  const handleCloseProject = () => {
+    if (props.project &&  props.project.status == 'open'){
+      props.changeStatus('finish', projectId);
+    }
+  }
+  const handleLockProject = () => {
+    if (props.project &&  props.project.status == 'closed'){
+      props.changeStatus('archive', projectId);
+    }
+  }
+  
+  const handleReopenProject = () => {
+    if (props.project &&  props.project.status == 'archived'){
+      props.changeStatus('reopen', projectId);
+    }
+  }
   return (
     <div>
       <Content
@@ -53,34 +59,37 @@ const Project = (props) => {
           padding: "0 50px",
         }}
       >
-        <Title level={2}>Project Title</Title>
-        <Title level={4}>Leader</Title><Button onClick={showModalAdd}>Change</Button>
+        <Title level={2}>{props.project ? props.project.title : 'Loading'}</Title>
+        <Title level={4}>{props.project && props.project.head && props.project.head.user ? props.project.head.user.name +' '+ props.project.head.user.surname : 'Loading'}</Title><Button onClick={showModalAdd}>Change</Button>
         <Button type="primary" onClick={showModal}>
           Edit
         </Button>
-        <Button type="primary">Send Nofication</Button>
-        <Button type="primary">Lock</Button>
+        {/* <Button type="primary">Send Nofication</Button> */}
+        {props.project &&  props.project.status == 'open' ? <Button type="primary" onClick={handleCloseProject}>Close</Button> : <></>}
+        {props.project &&  props.project.status == 'closed'?<Button type="primary" onClick={handleLockProject}>Lock</Button> : <></>}
+        {props.project &&  props.project.status == 'archived'?<Button type="primary" onClick={handleReopenProject}>Reopen</Button> : <></>}
         <Title level={4}>Status:</Title>
-        <Typography.Text mark>OPEN</Typography.Text>
+        <Typography.Text mark>{props.project ? props.project.status : 'Loading'}</Typography.Text>
 
         <List
           header={<div>Participants <Button onClick={showModalAdd}>Add</Button></div>}
           bordered
-          dataSource={mock_users}
+          dataSource={props.project && props.project.participants ? props.project.participants : []}
           renderItem={(item) => (
+            item && item.user?
             <List.Item>
-              <Typography.Text mark>{item.role}</Typography.Text> {item.title}
-            </List.Item>
+              <Typography.Text mark>{item.role}</Typography.Text> {item.user.name + ' ' + item.user.surname}
+            </List.Item> : <></>
           )}
         ></List>
 
         <List
           header={<div>Tasks</div>}
           bordered
-          dataSource={mock_tasks}
+          dataSource={props.project && props.project.tasks ? props.project.tasks : []}
           renderItem={(item) => (
             <List.Item>
-              <Typography.Text mark>{item.index}</Typography.Text> {item.title}
+              <Typography.Text mark>{item.id}</Typography.Text> {item.title}
             </List.Item>
           )}
         ></List>
@@ -108,12 +117,15 @@ const Project = (props) => {
 const mapStateToProps = (state) => {
   return {
     loading: state.authUser.loading,
-    users: state.authUser.users
+    users: state.authUser.users,
+    project: state.authUser.project
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
   getUsers: () => dispatch(getUsers()),
+  getProject: (projectId) => dispatch(getProject(projectId)),
+  changeStatus: (status, project_id) => dispatch(changeStatus(status, project_id))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Project);

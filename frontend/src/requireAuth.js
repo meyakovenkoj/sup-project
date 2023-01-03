@@ -7,7 +7,7 @@ export default function (ComposedComponent) {
   class RequireAuth extends Component {
     render() {
       return this.props.isAuth ? (
-        //   return 1 ? (
+          // return 1 ? (
         <ComposedComponent {...this.props} />
       ) : (
         <Redirect
@@ -19,8 +19,9 @@ export default function (ComposedComponent) {
     }
   }
 
+
   const mapStateToProps = (state) => {
-    return { isAuth: state.lists.isAuth };
+    return { isAuth: state.authUser.isAuth };
   };
   return connect(mapStateToProps)(RequireAuth);
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const url = 'https://v1517237.hosted-by-vdsina.ru';
-// const url = 'http://localhost:8080';
+// const url = 'https://v1517237.hosted-by-vdsina.ru';
+const url = 'http://localhost:8080';
 
 export function RegisterUser(userData) {
     return (dispatch) => {
@@ -38,6 +38,7 @@ export function LoginUser(userData) {
         {withCredentials: true}
       )
       .then((res) => {
+        dispatch({type: 'LOGIN_SUCCESS'})
         sessionStorage.setItem('Auth', 'true');
 
       })
@@ -169,6 +170,25 @@ export function getProjects() {
   }
 
 
+  export function getProject(id) {
+    return (dispatch) => {
+      axios
+        .get(url+'/_xhr/projects/' + id, {withCredentials: true})
+        .then((res) => {
+          console.log(res);
+          const proj = res.data.data.project;
+          var project={...proj, key:proj.id, label:proj.title};
+          dispatch({ type: 'SET_PROJECT', project })
+        })
+        .catch((err) => {
+          // alert(err);
+          alert(err.response.data.message)
+        })
+    }
+  }
+
+  
+  
   export function searchProject(title) {
     return (dispatch) => {
       axios
@@ -239,9 +259,12 @@ export function getProjects() {
         },
         {withCredentials: true}
       )
-        .then((res) => {
-            alert(res);
-        })
+      .then((res) => {
+        console.log(res);
+        const proj = res.data.data.project;
+        var project={...proj, key:proj.id, label:proj.title};
+        dispatch({ type: 'SET_PROJECT_STATUS', project })
+      })
         .catch((err) => {
           alert(err);
         });

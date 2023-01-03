@@ -32,6 +32,7 @@ export default class WebRoutes extends React.Component {
               />
               <Route exact path="/login" history={history} component={Login} />
               <Route path="/task" history={history} component={RequireAuth(Task)} />
+              <Route path="/project/:projectId" history={history} component={RequireAuth(Project)} />
               <Route path="/project" history={history} component={RequireAuth(Project)} />
               <Route path="/profile" history={history} component={RequireAuth(Profile)} />
               <Route

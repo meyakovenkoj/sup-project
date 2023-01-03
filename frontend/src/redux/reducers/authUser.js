@@ -4,9 +4,10 @@ const initialState = {
     profile: {},
     users: [],
     projects: [],
+    project: {},
     current_project_id: '',
     current_task_id: '',
-    current_user_id: ''
+    current_user_id: '',
   };
   
   export default (state = initialState, action) => {
@@ -48,7 +49,18 @@ const initialState = {
         ...state,
         projects: action.projects,
       };
-      case 'SET_TASKS':
+    case 'SET_PROJECT':
+        return {
+          ...state,
+          project: action.project,
+        };
+    case 'SET_PROJECT_STATUS':
+          return {
+            ...state,
+            project: {...state.project, status:action.project.status},
+          };
+        
+    case 'SET_TASKS':
         return {
           ...state,
           tasks: action.tasks,
