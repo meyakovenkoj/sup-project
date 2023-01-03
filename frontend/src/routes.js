@@ -1,11 +1,14 @@
 import React from 'react'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
-import App from './Main'
+import App from './components/Pages/Task/TaskSearch'
 import Login from './components/Pages/Login/Login'
 import Task from './components/Pages/Task/Task'
 import Profile from './components/Pages/Profile/Profile'
 import NotFound from './components/Pages/NotFound/NotFound'
 import HeaderBar from './components/Header/HeaderBar'
+import Project from './components/Pages/Project/Project'
+import ProjectSearch from './components/Pages/Project/ProjectSearch'
+import TaskSearch from './components/Pages/Task/TaskSearch'
 // import RequireAuth from './utils/requireAuth'
 
 export default class WebRoutes extends React.Component {
@@ -21,7 +24,13 @@ export default class WebRoutes extends React.Component {
                   exact
                   path="/"
                   history={history}
-                  component={App}
+                  component={TaskSearch}
+                  />
+                <Route
+                  exact
+                  path="/projects"
+                  history={history}
+                  component={ProjectSearch}
                   />
                 <Route
                   exact
@@ -33,6 +42,11 @@ export default class WebRoutes extends React.Component {
                   path="/task"
                   history={history}
                   component={Task}
+                  />
+                <Route
+                  path="/project"
+                  history={history}
+                  component={Project}
                   />
                 <Route
                   path="/profile"

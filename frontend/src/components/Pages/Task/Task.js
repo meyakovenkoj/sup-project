@@ -41,7 +41,7 @@ const Task = () => {
     };
     return (
         <div>
-            <Layout>
+            {/* <Layout> */}
             <Content
         style={{
           padding: '0 50px',
@@ -158,7 +158,7 @@ const Task = () => {
 
 
 </Content>
-            </Layout>
+            {/* </Layout> */}
             <Modal title="Close" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Solve></Solve>
             </Modal>

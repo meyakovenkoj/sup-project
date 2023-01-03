@@ -39,8 +39,8 @@ const HeaderBar = ({
         <Menu.Item key="/">
           <Link to="/">Tasks</Link>
         </Menu.Item>
-        <Menu.Item key="/login">
-          <Link to="/login">Projects</Link>
+        <Menu.Item key="/projects">
+          <Link to="/projects">Projects</Link>
         </Menu.Item>
         <Menu.Item key="/people">
           <Link to="/people">People</Link>

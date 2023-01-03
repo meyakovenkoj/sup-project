@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { Card, Space } from 'antd';
+import { Layout } from "antd";
 const { Meta } = Card;
+const { Header, Content, Footer, Sider } = Layout;
 
     const Login = () => {
         const onFinish = (values) => {
@@ -11,7 +13,7 @@ const { Meta } = Card;
           console.log('Failed:', errorInfo);
         };
     return (
-        <div>
+
 <Space align="center">
 
         <Card
@@ -70,7 +72,6 @@ const { Meta } = Card;
     </Form>
           </Card>
           </Space>
-    </div>
 );
     };
 
