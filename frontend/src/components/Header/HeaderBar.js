@@ -61,6 +61,9 @@ const HeaderBar = ({
         <Menu.Item key="/people">
           <Link to="/people">People</Link>
         </Menu.Item>
+        <Menu.Item key="/admin">
+          <Link to="/admin">Admin Panel</Link>
+        </Menu.Item>
         <Menu.Item key="create">
         <Button type="primary" onClick={showModal}>Create Task</Button>
         </Menu.Item>

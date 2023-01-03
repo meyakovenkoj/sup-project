@@ -11,6 +11,8 @@ import ProjectSearch from './components/Pages/Project/ProjectSearch'
 import TaskSearch from './components/Pages/Task/TaskSearch'
 import PeopleSearch from './components/Pages/People/PeopleSearch'
 import CreateProject from './components/Pages/Project/CreateProject'
+import Registration from './components/Pages/Login/Registation'
+import AdminPanel from './components/Pages/Admin/AdminPanel'
 // import RequireAuth from './utils/requireAuth'
 
 export default class WebRoutes extends React.Component {
@@ -65,6 +67,17 @@ export default class WebRoutes extends React.Component {
                   history={history}
                   component={CreateProject}
                   />
+                <Route
+                  path="/register"
+                  history={history}
+                  component={Registration}
+                  />
+                  <Route
+                  path="/admin"
+                  history={history}
+                  component={AdminPanel}
+                  />
+                  
                 <Route path="*" component={NotFound} />
               </Switch>
             </div>

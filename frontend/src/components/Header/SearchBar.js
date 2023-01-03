@@ -42,7 +42,7 @@ const SearchBar = () => {
                         <Button >Primary Button</Button>
                     </Col>
                     <Col className="gutter-row" span={6}>
-                        <Button type="primary">Primary Button</Button>
+                        <Link to="/create_project"><Button type="primary">Create Project</Button></Link>
 
                     </Col>
                 </Row>

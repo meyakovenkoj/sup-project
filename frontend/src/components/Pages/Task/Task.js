@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal } from 'antd';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu } from 'antd';
 import Search from '../../Header/Search';
 import Solve from './Solve';
@@ -11,9 +12,30 @@ import { Card } from 'antd';
 import { Input } from 'antd';
 import { Typography } from 'antd';
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Statistic } from 'antd';
+import EditComment from './EditComment';
+import EditTask from './EditTask';
 const { Title } = Typography;
+const { confirm } = Modal;
 const { TextArea } = Input;
+
+const showDeleteConfirm = () => {
+    confirm({
+      title: 'Are you sure delete this task?',
+      icon: <ExclamationCircleFilled />,
+      content: 'Some descriptions',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        console.log('OK');
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  };
 
 const { Meta } = Card;
 // const style = {
@@ -39,6 +61,40 @@ const Task = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const deleteShowModal = () => {
+        setIsDeleteModalOpen(true);
+    };
+    const handleOkDelete = () => {
+        setIsDeleteModalOpen(false);
+    };
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+    };
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const editShowModal = () => {
+        setIsEditModalOpen(true);
+    };
+    const handleOkEdit = () => {
+        setIsEditModalOpen(false);
+    };
+    const handleCancelEdit = () => {
+        setIsEditModalOpen(false);
+    };
+
+    const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+    const editTaskShowModal = () => {
+        setIsEditTaskModalOpen(true);
+    };
+    const handleOkEditTask = () => {
+        setIsEditTaskModalOpen(false);
+    };
+    const handleCancelEditTask = () => {
+        setIsEditTaskModalOpen(false);
+    };
+
     return (
         <div>
             {/* <Layout> */}
@@ -67,7 +123,7 @@ const Task = () => {
                         <Col className="gutter-row" span={6}>
                         </Col>
                         <Col className="gutter-row" span={6}>
-                            <Button >Primary Button</Button>
+                            <Button onClick={editTaskShowModal} >Edit</Button>
                         </Col>
                         <Col className="gutter-row" span={6}>
                             <Button type="primary">Primary Button</Button>
@@ -92,7 +148,7 @@ const Task = () => {
                     <Row gutter={16}>
                         <Col className="gutter-row" span={18}>
                             <Card
-                                title="Card title"
+                                title="Card title НАСТЯ"
                                 bordered={false}
                                 style={{
                                 }}
@@ -104,8 +160,21 @@ const Task = () => {
                             <Card>
                                 <UploadFile></UploadFile>
                             </Card>
+                            <Card>
+                            <Card
+                             type="inner"
+                             title="User 1"
+                             extra={<div>
+                                <Button type="primary" onClick={editShowModal}>Edit</Button>
+                                <DeleteOutlined key="delete" onClick={showDeleteConfirm}/>
+                                </div>}
+                            >
+                            <p>Card content</p>
+                            </Card>
+                            <br></br>
                             <TextArea rows={4} placeholder="maxLength is 6" maxLength={6} />
-                    <Button type="primary">Send</Button>
+                            <Button type="primary">Send</Button>
+                            </Card>
                         </Col>
                         <Col className="gutter-row" span={4}>
 
@@ -161,6 +230,14 @@ const Task = () => {
             {/* </Layout> */}
             <Modal title="Close" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Solve></Solve>
+            </Modal>
+            <Modal title="Are you sure to delete?" open={isDeleteModalOpen} onOk={handleOkDelete} onCancel={handleCancelDelete}>
+            </Modal>
+            <Modal title="Edit" open={isEditModalOpen} onOk={handleOkEdit} onCancel={handleCancelEdit}>
+                <EditComment></EditComment>
+            </Modal>
+            <Modal title="Edit" open={isEditTaskModalOpen} onOk={handleOkEditTask} onCancel={handleCancelEditTask}>
+                <EditTask></EditTask>
             </Modal>
         </div>
     );

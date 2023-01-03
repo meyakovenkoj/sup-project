@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom';
 import { Button, Space } from 'antd';
 
 const divStyle = {
@@ -13,14 +14,7 @@ const NotFound = () => {
       <div style={divStyle}>
         <h1>Not Found</h1>
         <p>Return back?</p>
-        <Button
-        type="primary"
-          onClick={() => {
-            window.location.href = "/";
-          }}
-        >
-          Go home
-        </Button>
+        <Link to="/"><Button type="primary">Go home</Button></Link>
       </div>
     );
 }
