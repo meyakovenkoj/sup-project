@@ -4,7 +4,6 @@ import './index.css';
 import WebRoutes from './routes'
 import { Provider } from 'react-redux'
 import configureStore from './redux/store'
-import HeaderBar from './components/Header/HeaderBar'
 import { Layout } from 'antd';
 const store = configureStore()
 
@@ -13,9 +12,6 @@ root.render(
   <React.StrictMode>
     <Provider store={{ ...store }}>
    <Layout style={{ height: '100%' }}>
-
-
-    <HeaderBar />
     <WebRoutes store={{ ...store }} />
    </Layout>
   </Provider>
