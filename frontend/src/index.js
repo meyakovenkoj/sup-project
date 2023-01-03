@@ -13,5 +13,5 @@ ReactDOM.render(
       <WebRoutes store={{ ...store }} />
     </Layout>
   </Provider>,
-  document.getElementById('root'),
-)
+  document.getElementById("root")
+);

@@ -1,65 +1,54 @@
-import React, { useState } from 'react';
-import { Modal } from 'antd';
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Breadcrumb, Layout, Menu } from 'antd';
-import Search from '../../Header/Search';
-// import Solve from './Solve';
-import UploadFile from '../../utils/UploadFile';
-import { Button, Space } from 'antd';
-import { Col, Divider, Row } from 'antd';
-import { Card } from 'antd';
-import { Input } from 'antd';
-import { Typography } from 'antd';
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import { Statistic } from 'antd';
-import { List } from 'antd';
-
-const { Title } = Typography;
-const { TextArea } = Input;
+import React from "react";
+import { Col, List, Row, Layout, Card, Input, Typography } from "antd";
 
 const { Meta } = Card;
 const { Header, Content, Footer, Sider } = Layout;
 
-
-const People = ({data}) => {
-    return (
-        <div>
-            <Content
+const People = ({ data }) => {
+  return (
+    <div>
+      <Content
         style={{
-          padding: '0 50px',
+          padding: "0 50px",
         }}
       >
         <Row gutter={16}>
-            <Col>
+          <Col>
             <Card
-    hoverable
-    style={{
-      width: 240,
-    }}
-    cover={<img alt="example" src="https://cs7.pikabu.ru/post_img/big/2019/03/26/11/1553625291161446207.jpg" />}
-  >
-    <Meta title="Europe Street beat" description="www.instagram.com" />
-  </Card>
-            </Col>
-            <Col>
+              hoverable
+              style={{
+                width: 240,
+              }}
+              cover={
+                <img
+                  alt="example"
+                  src="https://cs7.pikabu.ru/post_img/big/2019/03/26/11/1553625291161446207.jpg"
+                />
+              }
+            >
+              <Meta
+                title="Europe Street beat"
+                description="www.instagram.com"
+              />
+            </Card>
+          </Col>
+          <Col>
             <List
-      header={<div>Header</div>}
-      footer={<div>Footer</div>}
-      bordered
-      dataSource={data}
-      renderItem={(item) => (
-        <List.Item>
-          <Typography.Text mark>[ITEM]</Typography.Text> {item}
-        </List.Item>
-      )}
-    />
-            </Col>
+              header={<div>Header</div>}
+              footer={<div>Footer</div>}
+              bordered
+              dataSource={data}
+              renderItem={(item) => (
+                <List.Item>
+                  <Typography.Text mark>[ITEM]</Typography.Text> {item}
+                </List.Item>
+              )}
+            />
+          </Col>
         </Row>
-        
-  
       </Content>
-      </div>
-    );
+    </div>
+  );
 };
 
 export default People;

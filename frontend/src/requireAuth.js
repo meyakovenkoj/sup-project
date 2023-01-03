@@ -1,7 +1,7 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { Redirect } from 'react-router-dom'
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 
 export default function (ComposedComponent) {
   class RequireAuth extends Component {
@@ -12,15 +12,15 @@ export default function (ComposedComponent) {
       ) : (
         <Redirect
           to={{
-            pathname: '/login',
+            pathname: "/login",
           }}
         />
-      )
+      );
     }
   }
 
   const mapStateToProps = (state) => {
-    return { isAuth: state.lists.isAuth }
-  }
-  return connect(mapStateToProps)(RequireAuth)
+    return { isAuth: state.lists.isAuth };
+  };
+  return connect(mapStateToProps)(RequireAuth);
 }
